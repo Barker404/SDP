@@ -12,6 +12,10 @@
   ☐ get motors
   ☐ get to workshops
   ☐ research previous people code
+  ☐ we could start working on vision part of the system
+  ☐ get the lights blinking on arduino
+  ☐ figure out all communications issues that might occur
 
  Week2:
-  ☐ have a working prototype
+  ☐ have a working prototype of milestone 1
+  ☐ 
