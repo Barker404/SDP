@@ -6,16 +6,16 @@
  ☐ make our own timelines so as not to have allnighters
  ☐ Get everyone on trello
  ☐ make a shared google calendar?
+  ☐ figure out all communications issues that might occur
 
  Week1:
   ☐ get basic design ideas
-  ☐ get motors
-  ☐ get to workshops
+  ☐ get the lights blinking on arduino
   ☐ research previous people code
   ☐ we could start working on vision part of the system
-  ☐ get the lights blinking on arduino
-  ☐ figure out all communications issues that might occur
 
  Week2:
+  ☐ get motors
   ☐ have a working prototype of milestone 1
+  ☐ get to workshops
   ☐ 
