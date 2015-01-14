@@ -1,1 +1,17 @@
  ✔ start @done (15-01-14 15:32)
+
+ organisational:
+ ☐ get all of the people data
+ ☐ See when we should meet
+ ☐ make our own timelines so as not to have allnighters
+ ☐ Get everyone on trello
+ ☐ make a shared google calendar?
+
+ Week1:
+  ☐ get basic design ideas
+  ☐ get motors
+  ☐ get to workshops
+  ☐ research previous people code
+
+ Week2:
+  ☐ have a working prototype
