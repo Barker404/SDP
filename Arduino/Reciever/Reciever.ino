@@ -1,12 +1,7 @@
+
+#include <SDPArduino.h>
+#include <Wire.h>
 #include <SerialCommand.h>
-
-//
-// Turn on/off the LED on pin 13 by command received from the radio
-//  0 turns the LED off
-//  1 turns the LED on
-//  any other character sent has no effect
-//
-
 #include <SoftwareSerial.h>   // We need this even if we're not using a SoftwareSerial object
                               // Due to the way the Arduino IDE compiles
 
@@ -17,6 +12,8 @@ SerialCommand SCmd;   // The demo SerialCommand object
 byte msg;  // the command buffer
 void setup()
 {
+  SDPsetup();
+  helloWorld();
   pinMode(arduinoLED, OUTPUT);   // initialize pin 13 as digital output (LED)
   pinMode(8, OUTPUT);    // initialize pin 8 to control the radio
   digitalWrite(8, HIGH); // select the radio
@@ -53,4 +50,24 @@ void flash(int interval) {
 void unrecognized()
 {
   Serial.println("What?"); 
+}
+
+void allMotorsF(int speed){
+   
+  motorForward(0, speed);
+  motorForward(1, speed);
+  motorForward(2, speed);
+  motorForward(3, speed);
+  motorForward(4, speed);
+  motorForward(5, speed); 
+}
+
+void allMotorsB(int speed){
+   
+  motorBackward(0, speed);
+  motorBackward(1, speed);
+  motorBackward(2, speed);
+  motorBackward(3, speed);
+  motorBackward(4, speed);
+  motorBackward(5, speed); 
 }
