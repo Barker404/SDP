@@ -23,32 +23,72 @@
             
             $('button').on('click', function(){
             	var msg = $(this).data('msg');
+            	if(msg == 'TEST'){
+            	socket.emit('arduino', {data: 'TESTF '+$('#testinput').val()});
+            	}
+            	else if(msg == 'TEST2'){
+            	socket.emit('arduino', {data: 'TESTB '+$('#testinput2').val()});
+            	}
+            	
+            	else{
             	console.log(msg);
             	socket.emit('arduino', {data: msg});
+            	}
+
             	
             });
-            $('form#broadcast').submit(function(event) {
-                socket.emit('my broadcast event', {data: $('#broadcast_data').val()});
-                return false;
-            });
-            $('form#join').submit(function(event) {
-                socket.emit('join', {room: $('#join_room').val()});
-                return false;
-            });
-            $('form#leave').submit(function(event) {
-                socket.emit('leave', {room: $('#leave_room').val()});
-                return false;
-            });
-            $('form#send_room').submit(function(event) {
-                socket.emit('my room event', {room: $('#room_name').val(), data: $('#room_data').val()});
-                return false;
-            });
-            $('form#close').submit(function(event) {
-                socket.emit('close room', {room: $('#close_room').val()});
-                return false;
-            });
-            $('form#disconnect').submit(function(event) {
-                socket.emit('disconnect request');
-                return false;
-            });
+
+document.onkeydown = checkKey;
+
+function checkKey(e) {
+
+    e = e || window.event;
+
+	
+    if (e.keyCode == '38') {
+    	e.preventDefault();
+        // up arrow
+        socket.emit('arduino', {data: "FWD"});
+        console.log('FWD');
+    }
+    else if (e.keyCode == '40') {
+    	e.preventDefault();
+        // down arrow
+        socket.emit('arduino', {data: "BWD"});
+        console.log('BWD');
+    }
+    else if (e.keyCode == '37') {
+    	e.preventDefault();
+       // left arrow
+       socket.emit('arduino', {data: "TLEFT"});
+       console.log('LEFT');
+    }
+    else if (e.keyCode == '39') {
+    	e.preventDefault();
+       // right arrow
+       socket.emit('arduino', {data: "TRIGHT"});
+       console.log('RIGHT');
+    }
+    else if (e.keyCode == '32') {
+    	e.preventDefault();
+       // right arrow
+       socket.emit('arduino', {data: "STOP"});
+       console.log('STOP');
+    }
+    else if (e.keyCode == '96') {
+    	e.preventDefault();
+       // right arrow
+       socket.emit('arduino', {data: "KICK"});
+       console.log('KICK');
+    }
+    else if (e.keyCode == '97') {
+    	e.preventDefault();
+       // right arrow
+       socket.emit('arduino', {data: "KICKDOWN"});
+       console.log('KICK');
+    }
+}
+
+
+
         });

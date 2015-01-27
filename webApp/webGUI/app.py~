@@ -33,7 +33,7 @@ def arduino_message(message):
 	
 	print(type(msg));
 	msg = msg.encode('ascii');
-	
+	print(type(msg));
 	s.write(msg+'\n\r')
 	#test = s.readline();
 	
