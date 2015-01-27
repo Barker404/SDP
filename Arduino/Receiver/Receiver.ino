@@ -1,87 +1,152 @@
-#include <SerialCommand.h>
-#include <SoftwareSerial.h>
+
 #include <SDPArduino.h>
+#include <Wire.h>
+#include <SerialCommand.h>
+#include <SoftwareSerial.h>   // We need this even if we're not using a SoftwareSerial object
+                              // Due to the way the Arduino IDE compiles
 
+#define LED_PIN 13   // Arduino LED on board
+#define RADIO_PIN 8
+#define LEFT_WHEEL_MOTOR 3
+#define RIGHT_WHEEL_MOTOR 5
+#define KICKER_MOTOR 4
 
-/* These macros will have to be updated with the correct motor numbers. */
-#define  LEFT_MOTOR   1
-#define  RIGHT_MOTOR  2
-#define  KICK_MOTOR   3
-
-SerialCommand SCmd;
+SerialCommand SCmd;   // The demo SerialCommand object
 
 void setup()
 {
-	pinMode(8, OUTPUT);				// Set the radio pin to output.
-	digitalWrite(8, HIGH);			// Turn on the radio.
-	Serial.begin(115200);			// Start the serial port at 115200 baud (correct for XinoRF and RFu, if using XRF + Arduino you might need 9600).
-	Serial.print("STARTED");		// Send a message across the radio.
-	
-	SCmd.addCommand("FORWARDS_50", forwards50);		// Set arduino to run forwards50() on receiving the command "FORWARDS 50".
-	SCmd.addCommand("FORWARDS_10", forwards10);		// Set arduino to run forwards10() on receiving the command "FORWARDS 10".
-	SCmd.addCommand("BACKWARDS_20", backwards20);	// Set arduino to run backwards20() on reveiving the command "BACKWARDS 20".
-	SCmd.addCommand("KICK", kick);					// Set arduino to run kick() on receiving the command "KICK".
-	
-	SCmd.addDefaultHandler(unrecognized);			// Set arduino to run unrecognised() on receiving an unrecognised command.
+  SDPsetup();
+  helloWorld();
+  pinMode(LED_PIN, OUTPUT);   // initialize pin 13 as digital output (LED)
+  pinMode(8, OUTPUT);    // initialize pin 8 to control the radio
+  digitalWrite(8, HIGH); // select the radio
+  Serial.begin(115200);    // start the serial port at 115200 baud (correct for XinoRF and RFu, if using XRF + Arduino you might need 9600)
+  
+  Serial.print("STARTED");
+  SCmd.addCommand("ON",LED_on);          // Turns LED on
+  SCmd.addCommand("OFF",LED_off);        // Turns LED off
+  SCmd.addCommand("FWD",wheelsForward);
+  SCmd.addCommand("BWD",wheelsBackward);
+  SCmd.addCommand("TLEFT",wheelsLeft);
+  SCmd.addCommand("TRIGHT",wheelsRight);
+  SCmd.addCommand("STOP",wheelsStop);
+  SCmd.addCommand("KICK",kick);
+  SCmd.addCommand("TESTF",forwardTest);
+  SCmd.addCommand("TESTB",backwardTest);
+    
+  SCmd.addDefaultHandler(unrecognized);
 }
 void loop()
 {
-	SCmd.readSerial();
+  SCmd.readSerial();
 }
 
-void forwards50()
+void f50cm()
 {
-	Serial.println("Moving forwards 50cm.");
-	
-	motorForward(LEFT_MOTOR, 100);
-	motorForward(RIGHT_MOTOR, 100);
-	
-	delay(5000);
-	
-	motorStop(LEFT_MOTOR);
-	motorStop(RIGHT_MOTOR);
+    wheelsForward();
+    delay(2000);
+    wheelsStop();
+}
+void f10cm()
+{
+    wheelsForward();
+    delay(500);
+    wheelsStop();
+}
+void b20cm()
+{
+    wheelsBackward();
+    delay(1000);
+    wheelsStop();
 }
 
-void forwards10()
+
+void LED_on()
 {
-	Serial.println("Moving forwards 10cm.");
-	
-	motorForward(LEFT_MOTOR, 100);
-	motorForward(RIGHT_MOTOR, 100);
-	
-	delay(1000);
-	
-	motorStop(LEFT_MOTOR);
-	motorStop(RIGHT_MOTOR);
+  Serial.println("LED on"); 
+  digitalWrite(LED_PIN,HIGH);  
+}
+void LED_off()
+{
+  Serial.println("LED off"); 
+  digitalWrite(LED_PIN,LOW);
+}
+void flash(int interval)
+{
+  digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(interval);              // wait for a second
+  digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+  delay(interval);              // wait for a second
+}
+   
+void forwardTest()
+{
+  char *timeStr = SCmd.next();
+  if (timeStr != NULL)
+  {
+    int time = atoi(timeStr);
+    if (time != NULL)
+    {
+      wheelsForward();
+      delay(time);
+      wheelsStop();
+    }
+  }
+}
+    
+void backwardTest()
+{
+  char *timeStr = SCmd.next();
+  if (timeStr != NULL)
+  {
+    int time = atoi(timeStr);
+    if (time != NULL)
+    {
+      wheelsBackward();
+      delay(time);
+      wheelsStop();
+    }
+  }
 }
 
-void backwards20()
+void wheelsForward()
 {
-	Serial.println("Moving backwards 20cm.");
-	
-	motorBackward(LEFT_MOTOR, 100);
-	motorBackward(RIGHT_MOTOR, 100);
-	
-	delay(2000);
-	
-	motorStop(LEFT_MOTOR);
-	motorStop(RIGHT_MOTOR);
+  motorForward(3, 100);
+  motorForward(5, 100);
+}
+void wheelsBackward()
+{
+  motorBackward(3, 100);
+  motorBackward(5, 100);
+}
+void wheelsLeft()
+{
+  motorBackward(3, 100);
+  motorForward(5, 100);
+}
+void wheelsRight()
+{
+  motorForward(3, 100);
+  motorBackward(5, 100);
+}
+void wheelsStop()
+{
+  motorStop(3);
+  motorStop(5);
 }
 
 void kick()
 {
-	Serial.println("Kicking.");
-	
-	motorForward(KICK_MOTOR, 100);
-	
-	delay(500);
-	
-	motorBackward(KICK_MOTOR, 100);
-	
-	delay(500);
+  motorForward(4, 50);
+  delay(400);
+  motorStop(4);
+  delay(200);
+  motorBackward(4, 100);
+  delay(300);
+  motorStop(4);
 }
 
 void unrecognized()
 {
-	Serial.println("Command unrecognised."); 
+  Serial.println("What?"); 
 }
