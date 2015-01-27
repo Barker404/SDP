@@ -38,7 +38,7 @@
             	
             });
 
-document.onkeydown = checkKey;
+//document.onkeydown = checkKey;
 
 function checkKey(e) {
 
