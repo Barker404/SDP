@@ -31,6 +31,7 @@ void setup()
   SCmd.addCommand("TRIGHT",wheelsRight);
   SCmd.addCommand("STOP",wheelsStop);
   SCmd.addCommand("KICK",kick);
+  SCmd.addCommand("GOAL",goalKick);
   SCmd.addCommand("TESTF",forwardTest);
   SCmd.addCommand("TESTB",backwardTest);
     
@@ -137,7 +138,18 @@ void wheelsStop()
 
 void kick()
 {
-  motorForward(4, 50);
+  motorForward(4, 40);
+  delay(400);
+  motorStop(4);
+  delay(200);
+  motorBackward(4, 100);
+  delay(300);
+  motorStop(4);
+}
+
+void goalKick()
+{
+  motorForward(4, 60);
   delay(400);
   motorStop(4);
   delay(200);
