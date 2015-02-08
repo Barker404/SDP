@@ -71,6 +71,7 @@ class Controller:
         self.attacker = Attacker_Controller()
         self.defender = Defender_Controller()
 
+    # This looks important, name should probably change
     def wow(self):
         """
         Ready your sword, here be dragons.
@@ -142,6 +143,7 @@ class Controller:
                 self.defender.shutdown(self.arduino)
 
 
+# Superclass doesn't add much, most details are copied between subclasses
 class Robot_Controller(object):
     """
     Robot_Controller superclass for robot control.
@@ -158,6 +160,13 @@ class Robot_Controller(object):
             pass
 
 
+# Only differences between defender and attacker classes:
+# 1) Messages prefixed with 'D_', 'A_' 
+# - probably don't need whole new class for this
+# 2) Attacker doesn't set motors/speed if turning 90, defender does
+# - This seems like either a mistake, meaningless, or too subtle to be of use at this stage
+
+# Controller should probably be general between positions - especially as we only need one
 class Defender_Controller(Robot_Controller):
     """
     Defender implementation.
