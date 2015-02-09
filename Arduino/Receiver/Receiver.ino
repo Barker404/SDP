@@ -37,7 +37,7 @@ void setup()
   SCmd.addCommand("RUN_CATCH", catch);         
   SCmd.addCommand("DROP", drop);           
   SCmd.addCommand("SET_SENGINE");
-    
+  SCmd.addCommand("RUN_ENGINE");
   SCmd.addDefaultHandler(unrecognized);
 }
 void loop()
