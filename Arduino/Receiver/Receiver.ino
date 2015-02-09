@@ -34,8 +34,9 @@ void setup()
   SCmd.addCommand("STOP",wheelsStop);      //5
   SCmd.addCommand("KICK",kick);            //6
   SCmd.addCommand("CATCH", catch);         //7
+  SCmd.addCommand("DROP", drop);           //8
     
-  SCmd.addDefaultHandler(unrecognized);
+  SCmd.addDefaultHandler(unrecognized);    //9?
 }
 void loop()
 {
