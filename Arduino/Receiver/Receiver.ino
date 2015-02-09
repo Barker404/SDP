@@ -13,6 +13,11 @@
 
 SerialCommand SCmd;   // The demo SerialCommand object
 
+int left_speed = 0;
+int right_speed = 0;
+int left_dir = 0;
+int left_dir = 0;
+
 void setup()
 {
   SDPsetup();
@@ -27,69 +32,67 @@ void setup()
   // Make sure there's no more than ten of these!
   // Any more and the bottom ones don't work
   // !!!
-  SCmd.addCommand("FWD",wheelsForward);    //1
-  SCmd.addCommand("BWD",wheelsBackward);   //2
-  SCmd.addCommand("TLEFT",wheelsLeft);     //3
-  SCmd.addCommand("TRIGHT",wheelsRight);   //4
-  SCmd.addCommand("STOP",wheelsStop);      //5
-  SCmd.addCommand("KICK",kick);            //6
-  SCmd.addCommand("CATCH", catch);         //7
-  SCmd.addCommand("DROP", drop);           //8
-    
-  SCmd.addDefaultHandler(unrecognized);    //9?
+
+  SCmd.addCommand("RUN_KICK",kick);            
+  SCmd.addCommand("RUN_CATCH", catch);         
+  SCmd.addCommand("DROP", drop);           
+  SCmd.addCommand("SET_SENGINE", SET_ENGINE);
+  SCmd.addCommand("RUN_ENGINE", RUN_ENGINE);
+  SCmd.addDefaultHandler(unrecognized);
 }
 void loop()
 {
   SCmd.readSerial();
 }
 
-void wheelsForward()
-{
-  motorForward(3, 100);
-  motorForward(5, 100);
-}
-void wheelsBackward()
-{
-  motorBackward(3, 100);
-  motorBackward(5, 100);
-}
-void wheelsLeft()
-{
-  motorBackward(3, 100);
-  motorForward(5, 100);
-}
-void wheelsRight()
-{
-  motorForward(3, 100);
-  motorBackward(5, 100);
-}
-void wheelsStop()
-{
-  motorStop(3);
-  motorStop(5);
-}
-//old kick, rewritten to include releasing catcher before kick
-/*void kick()
-{
-  char *powerStr = SCmd.next();
-  if (powerStr != NULL)
+*void SET_ENGINE {
+  char *lftspd = SCmd.next();
+  char *rgtspd = SCmd.next();
+  
+  if (lftspd != NULL && rgtspd != NULL)
   {
-    int power = atoi(powerStr);
-    if (power != NULL)
-    {
-      motorForward(4, power);
-      delay(400);
-      motorStop(4);
-      delay(100);
-      motorBackward(4, power);
-      delay(400);
-      motorStop(4);
-    }
+    left_speed = atoi(lftsp);
+    right_speed = atoi(rgtspd);
   }
+  
 }
-*/
 
-*void kick() {
+*void RUN_ENGINE {
+  char *lftdir = SCmd.next();
+  char *rgtdir = SCmd.next();
+  
+  if (lftdir != NULL && rgtdir != NULL)
+  {
+    left_dir = atoi(lftdir);
+    right_dir = atoi(rgtdir);
+      
+      switch(right_dir) {
+        case -1:
+          motorBackward(5, right_speed)
+          break;
+        case 0:
+          motorStop(5);
+          break;
+        case 1:
+          motorForward(5, right_speed)   
+      }
+      
+      switch(left_dir) {
+        case -1:
+          motorBackward(3, left_speed)
+          break;
+        case 0:
+          motorStop(3);
+          break;
+        case 1:
+          motorForward(3, left_speed)   
+      }
+      
+    }
+}
+        
+    
+*void kick() { //motor 3 not catcher, needs changed
   char *powerStr = SCmd.next();
   if (powerStr != NULL)
   {
@@ -110,8 +113,6 @@ void wheelsStop()
     }
   }
 }
-
-      
 
 
 void catch() {
