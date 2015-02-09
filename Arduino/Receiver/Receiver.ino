@@ -27,12 +27,13 @@ void setup()
   // Make sure there's no more than ten of these!
   // Any more and the bottom ones don't work
   // !!!
-  SCmd.addCommand("FWD",wheelsForward);
-  SCmd.addCommand("BWD",wheelsBackward);
-  SCmd.addCommand("TLEFT",wheelsLeft);
-  SCmd.addCommand("TRIGHT",wheelsRight);
-  SCmd.addCommand("STOP",wheelsStop);
-  SCmd.addCommand("KICK",kick);
+  SCmd.addCommand("FWD",wheelsForward);    //1
+  SCmd.addCommand("BWD",wheelsBackward);   //2
+  SCmd.addCommand("TLEFT",wheelsLeft);     //3
+  SCmd.addCommand("TRIGHT",wheelsRight);   //4
+  SCmd.addCommand("STOP",wheelsStop);      //5
+  SCmd.addCommand("KICK",kick);            //6
+  SCmd.addCommand("CATCH", catch);         //7
     
   SCmd.addDefaultHandler(unrecognized);
 }
@@ -84,6 +85,12 @@ void kick()
       motorStop(4);
     }
   }
+}
+
+void catch() {
+  motorForward(3, 100)
+  delay(400)
+  motorStop(3)
 }
 
 void unrecognized()
