@@ -96,7 +96,7 @@ class Controller:
 
                 # Find appropriate action
                 self.planner.update_world(model_positions)
-                
+
                 # LB: again with the two robots
                 attacker_actions = self.planner.plan('attacker')
                 defender_actions = self.planner.plan('defender')
@@ -148,7 +148,7 @@ class Controller:
 
 class Robot_Controller(object):
     """
-    Robot_Controller superclass for robot control.
+    Robot_Controller class for robot control.
     """
 
     def __init__(self):
