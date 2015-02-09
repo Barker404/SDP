@@ -120,7 +120,7 @@ class Controller:
 
                     # Information about states
                     attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
-                else:
+                else:   
                     defender_actions = self.planner.plan('defender')
 
                     if self.robot is not None:

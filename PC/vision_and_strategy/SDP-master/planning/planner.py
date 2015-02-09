@@ -30,14 +30,16 @@ class Planner:
         # self._defender_defence_strat = DefenderDefence(self._world)
         # self._defender_attack_strat = DefaultDefenderAttack(self._world)
 
-        self._attacker_strategies = {'defence' : [AttackerDefend],
-                                     'grab' : [AttackerGrab, AttackerGrabCareful],
-                                     'score' : [AttackerDriveByTurn, AttackerDriveBy, AttackerTurnScore, AttackerScoreDynamic],
-                                     'catch' : [AttackerPositionCatch, AttackerCatch]}
+        self._attacker_strategies = { 'defence' : [AttackerGrab] }
+        # 'defence' : [AttackerDefend],
+        #                              'grab' : [AttackerGrab, AttackerGrabCareful],
+        #                              'score' : [AttackerDriveByTurn, AttackerDriveBy, AttackerTurnScore, AttackerScoreDynamic],
+        #                              'catch' : [AttackerPositionCatch, AttackerCatch]}
 
-        self._defender_strategies = {'defence' : [DefenderDefence, DefenderPenalty],
-                                     'grab' : [DefenderGrab],
-                                     'pass' : [DefenderBouncePass]}
+        self._defender_strategies = {'defence' : [DefenderDefence] }
+        # , DefenderPenalty],
+        #                              'grab' : [DefenderGrab],
+        #                              'pass' : [DefenderBouncePass]}
 
         self._defender_state = 'defence'
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
