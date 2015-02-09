@@ -161,7 +161,7 @@ class Robot_Controller(object):
 
     def __init__(self):
         """
-        Mystery Setup
+        Initialise variables
         """
         self.current_speed = 0
 
