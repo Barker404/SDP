@@ -65,9 +65,6 @@ void loop()
   {
     left_dir = atoi(lftdir);
     right_dir = atoi(rgtdir);
-
-    if (left_dir != NULL && right_dir != NULL)
-    {
       
       switch(right_dir) {
         case -1:
@@ -88,8 +85,8 @@ void loop()
         case 1:
           motorForward(3, left_speed)   
       }
+      
     }
-  }
 }
         
     
