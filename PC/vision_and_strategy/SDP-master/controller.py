@@ -101,6 +101,15 @@ class Controller:
 
                 self.planner.update_world(model_positions)
 
+
+
+                # test
+                attacking = False
+
+
+
+
+
                 # Milestone 2: we are either attacking or defending
                 if attacking:
                     # LB: again with the two robots
@@ -111,7 +120,7 @@ class Controller:
 
                     # Information about states
                     attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
-                else
+                else:
                     defender_actions = self.planner.plan('defender')
 
                     if self.robot is not None:

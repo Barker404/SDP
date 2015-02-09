@@ -91,6 +91,17 @@ class Planner:
     # I also don't think robot should have a default - to avoid forgetting the parameter
     # But we need to check if it is used anywhere without the parameter
     def plan(self, robot='attacker'):
+        # Test
+        self._defender_state = 'defence'
+        self._defender_current_strategy = self.choose_defender_strategy(self._world)
+        assert(self._defender_current_strategy == DefenderDefence)
+        return self._defender_current_strategy.generate()
+
+
+
+
+
+
         assert robot in ['attacker', 'defender']
         our_defender = self._world.our_defender
         our_attacker = self._world.our_attacker
