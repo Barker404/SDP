@@ -16,7 +16,7 @@ PROCESSING_DEBUG = False
 
 Center = namedtuple('Center', 'x y')
 
-
+# LB: Need to generalise to work with only one robot
 class Vision:
     """
     Locate objects on the pitch.

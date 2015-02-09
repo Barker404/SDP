@@ -70,7 +70,8 @@ class Controller:
 
         self.robot = Robot_Controller()
 
-    # This looks important, name should probably change
+    # LB: This looks important, name should probably change
+    # Seems to be the main loop
     def wow(self):
         """
         Ready your sword, here be dragons.
@@ -80,6 +81,8 @@ class Controller:
         try:
             c = True
             while c != 27:  # the ESC key
+
+                ### Vision ###
 
                 frame = self.camera.get_frame()
                 pre_options = self.preprocessing.options
@@ -94,6 +97,8 @@ class Controller:
                 model_positions, regular_positions = self.vision.locate(frame)
                 model_positions = self.postprocessing.analyze(model_positions)
 
+                ### Planning ###
+
                 # Find appropriate action
                 self.planner.update_world(model_positions)
 
@@ -107,7 +112,7 @@ class Controller:
                     self.defender.execute(self.arduino, defender_actions)
 
                 # Information about the grabbers from the world
-                # LB: Going to need to make sure grabber area is consistent with our robot
+                # LB: Does this need to be defined here? Can we not send them (to the gui) directly?
                 grabbers = {
                     'our_defender': self.planner._world.our_defender.catcher_area,
                     'our_attacker': self.planner._world.our_attacker.catcher_area
@@ -117,12 +122,15 @@ class Controller:
                 attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
                 defenderState = (self.planner.defender_state, self.planner.defender_strat_state)
 
+                ### Interface ###
+
                 # Use 'y', 'b', 'r' to change color.
                 c = waitKey(2) & 0xFF
+                # LB: why are we making this empty here? It passes to the GUI, should we not keep track of the actions?
                 actions = []
                 fps = float(counter) / (time.clock() - timer)
-                # Draw vision content and actions
 
+                # Draw vision content and actions
                 self.GUI.draw(
                     frame, model_positions, actions, regular_positions, fps, attackerState,
                     defenderState, attacker_actions, defender_actions, grabbers,
