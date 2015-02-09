@@ -68,8 +68,7 @@ class Controller:
 
         self.preprocessing = Preprocessing()
 
-        self.attacker = Attacker_Controller()
-        self.defender = Defender_Controller()
+        self.robot = Robot_Controller()
 
     # This looks important, name should probably change
     def wow(self):
@@ -97,6 +96,8 @@ class Controller:
 
                 # Find appropriate action
                 self.planner.update_world(model_positions)
+                
+                # LB: again with the two robots
                 attacker_actions = self.planner.plan('attacker')
                 defender_actions = self.planner.plan('defender')
 
@@ -106,6 +107,7 @@ class Controller:
                     self.defender.execute(self.arduino, defender_actions)
 
                 # Information about the grabbers from the world
+                # LB: Going to need to make sure grabber area is consistent with our robot
                 grabbers = {
                     'our_defender': self.planner._world.our_defender.catcher_area,
                     'our_attacker': self.planner._world.our_attacker.catcher_area
@@ -143,7 +145,7 @@ class Controller:
                 self.defender.shutdown(self.arduino)
 
 
-# Superclass doesn't add much, most details are copied between subclasses
+
 class Robot_Controller(object):
     """
     Robot_Controller superclass for robot control.
@@ -151,108 +153,39 @@ class Robot_Controller(object):
 
     def __init__(self):
         """
-        Connect to Brick and setup Motors/Sensors.
+        Mystery Setup
         """
         self.current_speed = 0
-
-    def shutdown(self, comm):
-        # TO DO
-            pass
-
-
-# Only differences between defender and attacker classes:
-# 1) Messages prefixed with 'D_', 'A_' 
-# - probably don't need whole new class for this
-# 2) Attacker doesn't set motors/speed if turning 90, defender does
-# - This seems like either a mistake, meaningless, or too subtle to be of use at this stage
-
-# Controller should probably be general between positions - especially as we only need one
-class Defender_Controller(Robot_Controller):
-    """
-    Defender implementation.
-    """
-
-    def __init__(self):
-        """
-        Do the same setup as the Robot class, as well as anything specific to the Defender.
-        """
-        super(Defender_Controller, self).__init__()
 
     def execute(self, comm, action):
         """
         Execute robot action.
         """
 
-        if 'turn_90' in action:
-            comm.write('D_RUN_ENGINE %d %d\n' % (0, 0))
-            time.sleep(0.2)
-            comm.write('D_RUN_SHOOT %d\n' % int(action['turn_90']))
-            time.sleep(2.2)
-
-        #print action
+        # LB: Needs to match our arduino messages
+        # Do we send "set engine [speed] [speed]", "run engine [left] [right]"
+        # Or something like "rightMotor [speed]", "leftMotor [speed]"
         left_motor = int(action['left_motor'])
         right_motor = int(action['right_motor'])
         speed = action['speed']
 
-        comm.write('D_SET_ENGINE %d %d\n' % (speed, speed))
-        comm.write('D_RUN_ENGINE %d %d\n' % (left_motor, right_motor))
+        comm.write('SET_ENGINE %d %d\n' % (speed, speed))
+        comm.write('RUN_ENGINE %d %d\n' % (left_motor, right_motor))
         if action['kicker'] != 0:
             try:
-                comm.write('D_RUN_KICK\n')
+                comm.write('RUN_KICK\n')
                 time.sleep(0.5)
             except StandardError:
                 pass
         elif action['catcher'] != 0:
             try:
-                comm.write('D_RUN_CATCH\n')
+                comm.write('RUN_CATCH\n')
             except StandardError:
                 pass
 
     def shutdown(self, comm):
-        comm.write('D_RUN_KICK\n')
-        comm.write('D_RUN_ENGINE %d %d\n' % (0, 0))
-
-
-class Attacker_Controller(Robot_Controller):
-    """
-    Attacker implementation.
-    """
-
-    def __init__(self):
-        """
-        Do the same setup as the Robot class, as well as anything specific to the Attacker.
-        """
-        super(Attacker_Controller, self).__init__()
-
-    def execute(self, comm, action):
-        """
-        Execute robot action.
-        """
-        if 'turn_90' in action:
-            comm.write('A_RUN_ENGINE %d %d\n' % (0, 0))
-            time.sleep(0.2)
-            comm.write('A_RUN_SHOOT %d\n' % int(action['turn_90']))
-            # time.sleep(1.2)
-        else:
-            left_motor = int(action['left_motor'])
-            right_motor = int(action['right_motor'])
-            speed = int(action['speed'])
-            comm.write('A_SET_ENGINE %d %d\n' % (speed, speed))
-            comm.write('A_RUN_ENGINE %d %d\n' % (left_motor, right_motor))
-            if action['kicker'] != 0:
-                try:
-                    comm.write('A_RUN_KICK\n')
-                except StandardError:
-                    pass
-            elif action['catcher'] != 0:
-                try:
-                    comm.write('A_RUN_CATCH\n')
-                except StandardError:
-                    pass
-
-    def shutdown(self, comm):
-        comm.write('A_RUN_KICK\n')
-        comm.write('A_RUN_ENGINE %d %d\n' % (0, 0))
+        comm.write('RUN_KICK\n')
+        comm.write('RUN_ENGINE %d %d\n' % (0, 0))
 
 
 class Arduino:
@@ -277,9 +210,7 @@ class Arduino:
                     self.comms = 0
                     #raise
         else:
-            #self.write('A_RUN_KICK\n')
             self.write('A_RUN_ENGINE %d %d\n' % (0, 0))
-            #self.write('D_RUN_KICK\n')
             self.write('D_RUN_ENGINE %d %d\n' % (0, 0))
             self.comms = 0
 
