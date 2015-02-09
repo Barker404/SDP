@@ -13,8 +13,10 @@
 
 SerialCommand SCmd;   // The demo SerialCommand object
 
+int left_speed = 0;
+int right_speed = 0;
 int left_dir = 0;
-int right_dir = 0;
+int left_dir = 0;
 
 void setup()
 {
@@ -43,7 +45,54 @@ void loop()
   SCmd.readSerial();
 }
 
-void SET_ENGINE {
+*void SET_ENGINE {
+  char *lftspd = SCmd.next();
+  char *rgtspd = SCmd.next();
+  
+  if (lftspd != NULL && rgtspd != NULL)
+  {
+    left_speed = atoi(lftsp);
+    right_speed = atoi(rgtspd);
+  }
+  
+}
+
+*void RUN_ENGINE {
+  char *lftdir = SCmd.next();
+  char *rgtdir = SCmd.next();
+  
+  if (lftdir != NULL && rgtdir != NULL)
+  {
+    left_dir = atoi(lftdir);
+    right_dir = atoi(rgtdir);
+
+    if (left_dir != NULL && right_dir != NULL)
+    {
+      
+      switch(right_dir) {
+        case -1:
+          motorBackward(5, right_speed)
+          break;
+        case 0:
+          break;
+        case 1:
+          motorForward(5, right_speed)   
+      }
+      
+      switch(left_dir) {
+        case -1:
+          motorBackward(3, left_speed)
+          break;
+        case 0:
+          break;
+        case 1:
+          motorForward(3, left_speed)   
+      }
+    }
+  }
+}
+        
+    
   
   
   
@@ -52,7 +101,7 @@ void SET_ENGINE {
 }
   
 
-*void kick() {
+*void kick() { //motor 3 not catcher, needs changed
   char *powerStr = SCmd.next();
   if (powerStr != NULL)
   {
