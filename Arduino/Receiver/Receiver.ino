@@ -71,6 +71,7 @@ void loop()
           motorBackward(5, right_speed)
           break;
         case 0:
+          motorStop(5);
           break;
         case 1:
           motorForward(5, right_speed)   
@@ -81,6 +82,7 @@ void loop()
           motorBackward(3, left_speed)
           break;
         case 0:
+          motorStop(3);
           break;
         case 1:
           motorForward(3, left_speed)   
@@ -90,14 +92,6 @@ void loop()
 }
         
     
-  
-  
-  
-  
-  
-}
-  
-
 *void kick() { //motor 3 not catcher, needs changed
   char *powerStr = SCmd.next();
   if (powerStr != NULL)
