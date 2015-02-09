@@ -18,7 +18,7 @@ class Controller:
     Primary source of robot control. Ties vision and planning together.
     """
 
-    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyUSB0', comms=1):
+    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM0', comms=1):
         """
         Entry point for the SDP system.
 
@@ -99,28 +99,25 @@ class Controller:
 
                 ### Planning ###
 
-                # Find appropriate action
                 self.planner.update_world(model_positions)
 
-                # LB: again with the two robots
-                attacker_actions = self.planner.plan('attacker')
-                defender_actions = self.planner.plan('defender')
+                # Milestone 2: we are either attacking or defending
+                if attacking:
+                    # LB: again with the two robots
+                    attacker_actions = self.planner.plan('attacker')
 
-                if self.attacker is not None:
-                    self.attacker.execute(self.arduino, attacker_actions)
-                if self.defender is not None:
-                    self.defender.execute(self.arduino, defender_actions)
+                    if self.robot is not None:
+                        self.robot.execute(self.arduino, attacker_actions)
 
-                # Information about the grabbers from the world
-                # LB: Does this need to be defined here? Can we not send them (to the gui) directly?
-                grabbers = {
-                    'our_defender': self.planner._world.our_defender.catcher_area,
-                    'our_attacker': self.planner._world.our_attacker.catcher_area
-                }
+                    # Information about states
+                    attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
+                else
+                    defender_actions = self.planner.plan('defender')
 
-                # Information about states
-                attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
-                defenderState = (self.planner.defender_state, self.planner.defender_strat_state)
+                    if self.robot is not None:
+                        self.robot.execute(self.arduino, defender_actions)
+
+                    defenderState = (self.planner.defender_state, self.planner.defender_strat_state)
 
                 ### Interface ###
 
@@ -130,6 +127,13 @@ class Controller:
                 actions = []
                 fps = float(counter) / (time.clock() - timer)
 
+                # Information about the grabbers from the world
+                # LB: Does this need to be defined here? Can we not send them (to the gui) directly?
+                grabbers = {
+                    'our_defender': self.planner._world.our_defender.catcher_area,
+                    'our_attacker': self.planner._world.our_attacker.catcher_area
+                }
+
                 # Draw vision content and actions
                 self.GUI.draw(
                     frame, model_positions, actions, regular_positions, fps, attackerState,
@@ -138,19 +142,15 @@ class Controller:
                 counter += 1
 
         except:
-            if self.defender is not None:
-                self.defender.shutdown(self.arduino)
-            if self.attacker is not None:
-                self.attacker.shutdown(self.arduino)
+            if self.robot is not None:
+                self.robot.shutdown(self.arduino)
             raise
 
         finally:
             # Write the new calibrations to a file.
             tools.save_colors(self.pitch, self.calibration)
-            if self.attacker is not None:
-                self.attacker.shutdown(self.arduino)
-            if self.defender is not None:
-                self.defender.shutdown(self.arduino)
+            if self.robot is not None:
+                self.robot.shutdown(self.arduino)
 
 
 
@@ -171,8 +171,7 @@ class Robot_Controller(object):
         """
 
         # LB: Needs to match our arduino messages
-        # Do we send "set engine [speed] [speed]", "run engine [left] [right]"
-        # Or something like "rightMotor [speed]", "leftMotor [speed]"
+        # Send messages like this so that both motors go on at the same time
         left_motor = int(action['left_motor'])
         right_motor = int(action['right_motor'])
         speed = action['speed']
@@ -216,10 +215,8 @@ class Arduino:
                     print "No Arduino detected!"
                     print "Continuing without comms."
                     self.comms = 0
-                    #raise
         else:
-            self.write('A_RUN_ENGINE %d %d\n' % (0, 0))
-            self.write('D_RUN_ENGINE %d %d\n' % (0, 0))
+            self.write('RUN_ENGINE %d %d\n' % (0, 0))
             self.comms = 0
 
     def write(self, string):
