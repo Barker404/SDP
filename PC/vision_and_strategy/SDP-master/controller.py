@@ -186,6 +186,19 @@ class Robot_Controller(object):
 
         # LB: Needs to match our arduino messages
         # Send messages like this so that both motors go on at the same time
+        # LB: arduino control assumptions turned out to be wrong:
+        # 'left_motor' and 'right_motor' are values between 
+        # -(utilities.MAX_DISPLACEMENT_SPEED) and (utilities.MAX_DISPLACEMENT_SPEED)
+        # or between -(utilities.MAX_ANGLE_SPEED) and (utilities.MAX_ANGLE_SPEED)
+        # Team 7 used stepper motors, so these seem to actually represent a number of steps
+        # Roughly, how long to fire the motors for
+        # This might need translating to our system
+        #
+        # speed (sent to arduino twice?) is an extra value (equivalent to max speed/acceleration)
+        # It is one of two values - (magic numbers) 95 or 300
+        #
+        # Best bet might be to ignore the (general) speed 
+        # and simply transform the left/right values to "speeds"
         left_motor = int(action['left_motor'])
         right_motor = int(action['right_motor'])
         speed = action['speed']

@@ -1,6 +1,9 @@
 from math import tan, pi, hypot, log
 from planning.models import Robot
 
+# LB: need to update this to match our motors
+# In particular they run at between ~30 and 100
+# (Below 30 and the motors will not spin)
 DISTANCE_MATCH_THRESHOLD = 15
 ANGLE_MATCH_THRESHOLD = pi/10
 BALL_ANGLE_THRESHOLD = pi/20
@@ -117,6 +120,7 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
     Simplistic view of calculating the speed: no modes or trying to be careful
     '''
     moving_backwards = False
+    # LB: Lovely magic numbers
     general_speed = 95 if careful else 300
     angle_thresh = BALL_ANGLE_THRESHOLD if careful else ANGLE_MATCH_THRESHOLD
 
