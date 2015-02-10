@@ -209,7 +209,8 @@ class Robot_Controller(object):
                 left_motor = int(action['left_motor'])
             if 'right_motor' in action:
                 right_motor = int(action['right_motor'])
-            comm.write('RUN_ENGINE %d %d\n' % (left_motor, right_motor))
+            msg = 'RUN_ENG %d %d\r' % (max(min(left_motor, 99), -99), max(min(right_motor, 99), -99))
+            comm.write(msg)
 
         if 'speed' in action:
             # LB: need to decide whether to use this or not
@@ -217,20 +218,20 @@ class Robot_Controller(object):
 
         if 'kicker' in action and action['kicker'] != 0:
             try:
-                comm.write('RUN_KICK\n')
+                comm.write('RUN_KICK\r')
                 # Let the kick finish before we tell it what else to do
                 time.sleep(0.5)
             except StandardError:
                 pass
         elif 'catcher' in action and action['catcher'] != 0:
             try:
-                comm.write('RUN_CATCH\n')
+                comm.write('RUN_CATCH\r')
             except StandardError:
                 pass
 
     def shutdown(self, comm):
-        comm.write('RUN_KICK\n')
-        comm.write('RUN_ENGINE %d %d\n' % (0, 0))
+        comm.write('RUN_KICK\r')
+        comm.write('RUN_ENG %d %d\r' % (0, 0))
 
 
 class Arduino:
@@ -242,6 +243,7 @@ class Arduino:
         self.rate = rate
         self.timeout = timeOut
         self.setComms(comms)
+        self.thing = 0
 
     def setComms(self, comms):
         if comms > 0:
@@ -250,16 +252,22 @@ class Arduino:
                 try:
                     self.serial = serial.Serial(self.port, self.rate, timeout=self.timeout)
                 except:
+                    print self.port
+                    print self.rate
+                    print self.timeout
                     print "No Arduino detected!"
                     print "Continuing without comms."
                     self.comms = 0
         else:
-            self.write('RUN_ENGINE %d %d\n' % (0, 0))
+            self.write('RUN_ENG %d %d\r' % (0, 0))
             self.comms = 0
 
     def write(self, string):
         if self.comms == 1:
-            self.serial.write(string)
+            if self.thing % 50 == 0:
+                print string
+                self.serial.write(string)
+        self.thing += 1
 
 
 if __name__ == '__main__':
