@@ -13,10 +13,10 @@
 #define RIGHT_WHEEL_MOTOR 5
 #define KICKER_MOTOR 4
 
-int left_speed;
-int right_speed;
-int left_dir;
-int right_dir;
+// int left_speed;
+// int right_speed;
+// int left_dir;
+// int right_dir;
 
 SerialCommand SCmd;   // The demo SerialCommand object
 
@@ -37,9 +37,9 @@ void setup() {
 
   SCmd.addCommand("RUN_KICK",kick);            
   SCmd.addCommand("RUN_CATCH", pick_up);         
-  SCmd.addCommand("DROP", drop);           
-  SCmd.addCommand("SET_ENG", SET_ENGINE);
-  SCmd.addCommand("RUN_ENGINE", RUN_ENGINE);
+  SCmd.addCommand("DROP", drop);
+  /*SCmd.addCommand("SET_ENG", SET_ENGINE);*/
+  SCmd.addCommand("RUN_ENG", RUN_ENGINE);
   SCmd.addDefaultHandler(unrecognized);
 }
 
@@ -47,7 +47,7 @@ void loop() {
   SCmd.readSerial();
 }
 
-void SET_ENGINE() {
+/*void SET_ENGINE() {
 
   char *lftspd = SCmd.next();
   char *rgtspd = SCmd.next();
@@ -63,42 +63,43 @@ void SET_ENGINE() {
     motorStop(5);
   }
  
-}
+}*/
 
 void RUN_ENGINE() {
 
-  char *lftdir = SCmd.next();
-  char *rgtdir = SCmd.next();
+  char *leftSpeedStr = SCmd.next();
+  char *rightSpeedStr = SCmd.next();
   
-  if (lftdir != NULL && rgtdir != NULL) {
-    left_dir = atoi(lftdir);
-    right_dir = atoi(rgtdir);
+  if (leftSpeedStr != NULL && rightSpeedStr != NULL) {
+    int leftSpeed = atoi(leftSpeedStr);
+    int rightSpeed = atoi(rightSpeedStr);
       
-      switch(right_dir) {
-        case -1:
-          motorBackward(5, right_speed);
-          break;
-        case 0:
-          motorStop(5);
-          break;
-        case 1:
-          motorForward(5, right_speed);
-          break;
-      }
-      
-      switch(left_dir) {
-        case -1:
-          motorBackward(3, left_speed);
-          break;
-        case 0:
-          motorStop(3);
-          break;
-        case 1:
-          motorForward(3, left_speed);
-          break;
-      }
-      
+    if (leftSpeed > 0)
+    {
+        motorForward(5, leftSpeed);
     }
+    else if (leftSpeed < 0)
+    {
+        motorBackward(5, leftSpeed);
+    }
+    else
+    {
+      motorStop(5);
+    }
+
+    if (rightSpeed > 0)
+    {
+        motorForward(3, rightSpeed);
+    }
+    else if (rightSpeed < 0)
+    {
+        motorBackward(3, rightSpeed);
+    }
+    else
+    {
+      motorStop(3);
+    }
+  }
 }
         
     
