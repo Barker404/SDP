@@ -134,7 +134,7 @@ void pick_up() {
 }
 
 void drop() {
-  motorBackward(CATCHER_MOTOR,100);
+  motorForward(CATCHER_MOTOR,100);
   delay(300);
   motorStop(CATCHER_MOTOR);
 }
