@@ -184,8 +184,6 @@ class Robot_Controller(object):
         Execute robot action.
         """
 
-        # LB: Needs to match our arduino messages
-        # Send messages like this so that both motors go on at the same time
         # LB: arduino control assumptions turned out to be wrong:
         # 'left_motor' and 'right_motor' are values between 
         # -(utilities.MAX_DISPLACEMENT_SPEED) and (utilities.MAX_DISPLACEMENT_SPEED)
@@ -199,19 +197,30 @@ class Robot_Controller(object):
         #
         # Best bet might be to ignore the (general) speed 
         # and simply transform the left/right values to "speeds"
-        left_motor = int(action['left_motor'])
-        right_motor = int(action['right_motor'])
-        speed = action['speed']
 
-        comm.write('SET_ENGINE %d %d\n' % (speed, speed))
-        comm.write('RUN_ENGINE %d %d\n' % (left_motor, right_motor))
-        if action['kicker'] != 0:
+        # Do whatever actions are specified in the action dict
+        # To kick without affecting wheels, don't send 'left_motor' or 'right_motor' at all
+        if 'left_motor' in aciton or 'right_motor' in action:
+            left_motor = 0
+            right_motor = 0
+            if 'left_motor' in action:
+                left_motor = int(action['left_motor'])
+            if 'right_motor' in action:
+                right_motor = int(action['right_motor'])
+            comm.write('RUN_ENGINE %d %d\n' % (left_motor, right_motor))
+
+        if 'speed' in action:
+            # LB: need to decide whether to use this or not
+            speed = action['speed']
+
+        if 'kicker' in action and action['kicker'] != 0:
             try:
                 comm.write('RUN_KICK\n')
+                # Let the kick finish before we tell it what else to do
                 time.sleep(0.5)
             except StandardError:
                 pass
-        elif action['catcher'] != 0:
+        elif 'catcher' in action and action['catcher'] != 0:
             try:
                 comm.write('RUN_CATCH\n')
             except StandardError:
