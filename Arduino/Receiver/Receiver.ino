@@ -39,7 +39,7 @@ void setup() {
   SCmd.addCommand("RUN_KICK",kick);            
   SCmd.addCommand("RUN_CATCH", pick_up);         
   SCmd.addCommand("DROP", drop);           
-  SCmd.addCommand("SET", SET_ENGINE);
+  SCmd.addCommand("SET_ENG", SET_ENGINE);
   SCmd.addCommand("RUN_ENGINE", RUN_ENGINE);
   SCmd.addDefaultHandler(unrecognized);
 }
@@ -110,32 +110,32 @@ void kick() { //motor 3 not catcher, needs changed
     int power = atoi(powerStr);
     if (power != NULL) {
       
-      motorForward(3, 100);    //Start opening the catcher first so that the catcher legs don't foul the ball
-      motorForward(4, power);
-      delay(300);
-      motorStop(3);
-      motorStop(4);
-      motorBackward(4, power); //change return power
-      delay(300);
-      motorStop(4);
-      motorBackward(3, 100); //return the kicker to resting position before closing the catcher first, otherwise the catcher will stop the kicker return
-      delay(300);
-      motorStop(3);
+      motorForward(CATCHER_MOTOR, 100);    //Start opening the catcher first so that the catcher legs don't foul the ball
+      delay(100); //allows the catcher to move out the way so that the kciker can swing out
+      motorForward(KICKER_MOTOR, power);
+      delay(200);
+      motorStop(CATCHER_MOTOR);
+      delay(100);
+      motorStop(KICKER_MOTOR);
+      motorBackward(KICKER_MOTOR, 50); //return the kicker to resting position ready for the ball to be caught again
+      delay(100);
+      motorStop(KICKER_MOTOR);
+
     }
   }
 }
 
 
 void pick_up() {
-  motorForward(3, 100);
+  motorBackward(CATCHER_MOTOR, 100);
   delay(400);
-  motorStop(3);
+  motorStop(CATCHER_MOTOR);
 }
 
 void drop() {
-  motorBackward(3,100);
+  motorBackward(CATCHER_MOTOR,100);
   delay(300);
-  motorStop(3);
+  motorStop(CATCHER_MOTOR);
 }
 
 void unrecognized() {
