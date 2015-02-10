@@ -96,8 +96,6 @@ class Planner:
         # Test
         self._defender_state = 'defence'
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
-        print self._defender_current_strategy
-        assert(self._defender_current_strategy == DefenderDefence)
         return self._defender_current_strategy.generate()
 
 
