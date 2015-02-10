@@ -12,6 +12,7 @@
 #define LEFT_WHEEL_MOTOR 3
 #define RIGHT_WHEEL_MOTOR 5
 #define KICKER_MOTOR 4
+#define CATCHER_MOTOR 2
 
 int left_speed;
 int right_speed;
@@ -38,7 +39,7 @@ void setup() {
   SCmd.addCommand("RUN_KICK",kick);            
   SCmd.addCommand("RUN_CATCH", pick_up);         
   SCmd.addCommand("DROP", drop);           
-  SCmd.addCommand("SET_ENG", SET_ENGINE);
+  SCmd.addCommand("SET", SET_ENGINE);
   SCmd.addCommand("RUN_ENGINE", RUN_ENGINE);
   SCmd.addDefaultHandler(unrecognized);
 }
