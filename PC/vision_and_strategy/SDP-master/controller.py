@@ -201,7 +201,7 @@ class Robot_Controller(object):
 
         # Do whatever actions are specified in the action dict
         # To kick without affecting wheels, don't send 'left_motor' or 'right_motor' at all
-        if 'left_motor' in aciton or 'right_motor' in action:
+        if 'left_motor' in action or 'right_motor' in action:
             left_motor = 0
             right_motor = 0
             if 'left_motor' in action:
