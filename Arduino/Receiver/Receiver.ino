@@ -36,9 +36,9 @@ void setup() {
   // !!!
 
   SCmd.addCommand("RUN_KICK",kick);            
-  SCmd.addCommand("RUN_CATCH", catch);         
+  SCmd.addCommand("RUN_CATCH", pick_up);         
   SCmd.addCommand("DROP", drop);           
-  SCmd.addCommand("SET_ENGINE", SET_ENGINE);
+  SCmd.addCommand("SET_ENG", SET_ENGINE);
   SCmd.addCommand("RUN_ENGINE", RUN_ENGINE);
   SCmd.addDefaultHandler(unrecognized);
 }
@@ -48,17 +48,25 @@ void loop() {
 }
 
 void SET_ENGINE() {
+
   char *lftspd = SCmd.next();
   char *rgtspd = SCmd.next();
+  
   
   if (lftspd != NULL && rgtspd != NULL) {
     left_speed = atoi(lftspd);
     right_speed = atoi(rgtspd);
+    motorForward(5, left_speed);
+    motorForward(3, right_speed);
+    delay(1000);
+    motorStop(3);
+    motorStop(5);
   }
-  
+ 
 }
 
 void RUN_ENGINE() {
+
   char *lftdir = SCmd.next();
   char *rgtdir = SCmd.next();
   
@@ -117,7 +125,7 @@ void kick() { //motor 3 not catcher, needs changed
 }
 
 
-void catch() {
+void pick_up() {
   motorForward(3, 100);
   delay(400);
   motorStop(3);
