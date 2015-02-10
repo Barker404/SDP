@@ -126,6 +126,8 @@ class Controller:
                 # else:   
                 defender_actions = self.planner.plan('defender')
 
+                print defender_actions
+
                 if self.robot is not None:
                     self.robot.execute(self.arduino, defender_actions)
 
