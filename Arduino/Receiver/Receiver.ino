@@ -112,13 +112,14 @@ void kick() { //motor 3 not catcher, needs changed
       
       motorForward(CATCHER_MOTOR, 100);    //Start opening the catcher first so that the catcher legs don't foul the ball
       delay(100); //allows the catcher to move out the way so that the kciker can swing out
-      motorForward(KICKER_MOTOR, power);
+      motorBackward(KICKER_MOTOR, power); //when kicking, motor is moving backwards
       delay(200);
       motorStop(CATCHER_MOTOR);
       delay(100);
       motorStop(KICKER_MOTOR);
-      motorBackward(KICKER_MOTOR, 50); //return the kicker to resting position ready for the ball to be caught again
-      delay(100);
+      delay(150);
+      motorForward(KICKER_MOTOR, power); //return the kicker to resting position ready for the ball to be caught again
+      delay(200);
       motorStop(KICKER_MOTOR);
 
     }
@@ -127,8 +128,8 @@ void kick() { //motor 3 not catcher, needs changed
 
 
 void pick_up() {
-  motorBackward(CATCHER_MOTOR, 100);
-  delay(400);
+  motorBackward(CATCHER_MOTOR, 60);
+  delay(200);
   motorStop(CATCHER_MOTOR);
 }
 
