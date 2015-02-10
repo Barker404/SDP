@@ -193,7 +193,8 @@ class Robot_Controller(object):
         # This might need translating to our system
         #
         # speed (sent to arduino twice?) is an extra value (equivalent to max speed/acceleration)
-        # It is one of two values - (magic numbers) 95 or 300
+        # When moving straight forwards, it is some complicated value
+        # otherwise, it is one of two values - (magic numbers) 95 or 300 (depending on "carefullness")
         #
         # Best bet might be to ignore the (general) speed 
         # and simply transform the left/right values to "speeds"
