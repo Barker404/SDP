@@ -114,24 +114,25 @@ class Controller:
 
 
                 # Milestone 2: we are either attacking or defending
-                # if attacking:
-                # LB: again with the two robots
-                attacker_actions = self.planner.plan('attacker')
+                if attacking:
+                    # LB: again with the two robots
+                    attacker_actions = self.planner.plan('attacker')
 
-                if self.robot is not None:
-                    self.robot.execute(self.arduino, attacker_actions)
+                    if self.robot is not None:
+                        self.robot.execute(self.arduino, attacker_actions)
 
-                # Information about states
-                attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
-                # else:   
-                defender_actions = self.planner.plan('defender')
+                    # Information about states
+                    # LB: These should also include the current strategy name
+                    attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
+                else:   
+                    defender_actions = self.planner.plan('defender')
 
-                print defender_actions
+                    print defender_actions
 
-                if self.robot is not None:
-                    self.robot.execute(self.arduino, defender_actions)
+                    if self.robot is not None:
+                        self.robot.execute(self.arduino, defender_actions)
 
-                defenderState = (self.planner.defender_state, self.planner.defender_strat_state)
+                    defenderState = (self.planner.defender_state, self.planner.defender_strat_state)
 
                 ### Interface ###
 

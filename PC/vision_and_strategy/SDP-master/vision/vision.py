@@ -504,20 +504,32 @@ class GUI(object):
         x_offset = 20
         y_offset = frame_height+140
 
-        self.draw_text(frame, "Attacker State:", x_main(1) - x_offset, y_offset, size=0.6)
-        self.draw_text(frame, aState[0], x_main(1) - x_offset, y_offset + 15, size=0.6)
-        self.draw_text(frame, aState[1], x_main(1) - x_offset, y_offset + 30, size=0.6)
+        if aState is not None:
+            self.draw_text(frame, "Attacker State:", x_main(1) - x_offset, y_offset, size=0.6)
+            if len(aState) > 0 and aState[0] is not None:
+                self.draw_text(frame, aState[0], x_main(1) - x_offset, y_offset + 15, size=0.6)
+            if len(aState) > 1 and aState[1] is not None:
+                self.draw_text(frame, aState[1], x_main(1) - x_offset, y_offset + 30, size=0.6)
 
-        self.draw_text(frame, "Defender State:", x_main(2) + x_offset, y_offset, size=0.6)
-        self.draw_text(frame, dState[0], x_main(2) + x_offset, y_offset + 15, size=0.6)
-        self.draw_text(frame, dState[1], x_main(2)+x_offset, y_offset + 30, size=0.6)
+        if dState is not None:
+            self.draw_text(frame, "Defender State:", x_main(2) + x_offset, y_offset, size=0.6)
+            if len(dState) > 0 and dState[0] is not None:
+                self.draw_text(frame, dState[0], x_main(2) + x_offset, y_offset + 15, size=0.6)
+            if len(dState) > 1 and dState[1] is not None:
+                self.draw_text(frame, dState[1], x_main(2)+x_offset, y_offset + 30, size=0.6)
 
     def draw_actions(self, frame, action, x, y):
-        self.draw_text(
-            frame, "Left Motor: " + str(action['left_motor']), x, y+5, color=BGR_COMMON['white'])
-        self.draw_text(
-            frame, "Right Motor: " + str(action['right_motor']), x, y+15, color=BGR_COMMON['white'])
-        self.draw_text(
-            frame, "Speed: " + str(action['speed']), x, y + 25, color=BGR_COMMON['white'])
-        self.draw_text(frame, "Kicker: " + str(action['kicker']), x, y + 35, color=BGR_COMMON['white'])
-        self.draw_text(frame, "Catcher: " + str(action['catcher']), x, y + 45, color=BGR_COMMON['white'])
+        if action is not None:
+            if 'left_motor' in action and action['left_motor'] is not None
+                self.draw_text(
+                    frame, "Left Motor: " + str(action['left_motor']), x, y+5, color=BGR_COMMON['white'])
+            if 'right_motor' in action and action['right_motor'] is not None
+                self.draw_text(
+                    frame, "Right Motor: " + str(action['right_motor']), x, y+15, color=BGR_COMMON['white'])
+            if 'speed' in action and action['speed'] is not None
+                self.draw_text(
+                    frame, "Speed: " + str(action['speed']), x, y + 25, color=BGR_COMMON['white'])
+            if 'kicker' in action and action['kicker'] is not None
+                self.draw_text(frame, "Kicker: " + str(action['kicker']), x, y + 35, color=BGR_COMMON['white'])
+            if 'catcher' in action and action['catcher'] is not None
+                self.draw_text(frame, "Catcher: " + str(action['catcher']), x, y + 45, color=BGR_COMMON['white'])
