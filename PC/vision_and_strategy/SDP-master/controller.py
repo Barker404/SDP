@@ -5,7 +5,7 @@ from preprocessing.preprocessing import Preprocessing
 import vision.tools as tools
 from cv2 import waitKey
 import cv2
-#import serial
+import serial
 import warnings
 import time
 
