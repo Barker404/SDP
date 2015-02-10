@@ -131,27 +131,27 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
     if not (displacement is None):
 
         if displacement < DISTANCE_MATCH_THRESHOLD:
-            return {'left_motor': 0, 'right_motor': 0, 'speed': general_speed}
+            return {'left_motor': 0, 'right_motor': 0, 'kicker': 0, 'catcher': 0, 'speed': general_speed}
 
         elif abs(angle) > angle_thresh:
             speed = (angle/pi) * MAX_ANGLE_SPEED
-            return {'left_motor': -speed, 'right_motor': speed, 'speed': general_speed}
+            return {'left_motor': -speed, 'right_motor': speed, 'kicker': 0, 'catcher': 0, 'speed': general_speed}
 
         else:
             speed = log(displacement, 10) * MAX_DISPLACEMENT_SPEED
             speed = -speed if moving_backwards else speed
             if careful:
-                return {'left_motor': speed, 'right_motor': speed, 'speed': 1000/(1+10**(-0.1*(displacement-85)))}
-            return {'left_motor': speed, 'right_motor': speed, 'speed': 1000/(1+10**(-0.1*(displacement-30)))}
+                return {'left_motor': speed, 'right_motor': speed, 'kicker': 0, 'catcher': 0, 'speed': 1000/(1+10**(-0.1*(displacement-85)))}
+            return {'left_motor': speed, 'right_motor': speed, 'kicker': 0, 'catcher': 0, 'speed': 1000/(1+10**(-0.1*(displacement-30)))}
 
     else:
 
         if abs(angle) > angle_thresh:
             speed = (angle/pi) * MAX_ANGLE_SPEED
-            return {'left_motor': -speed, 'right_motor': speed, 'speed': general_speed}
+            return {'left_motor': -speed, 'right_motor': speed, 'kicker': 0, 'catcher': 0, 'speed': general_speed}
 
         else:
-            return {'left_motor': 0, 'right_motor': 0, 'speed': general_speed}
+            return {'left_motor': 0, 'right_motor': 0, 'kicker': 0, 'catcher': 0, 'speed': general_speed}
 
 
 
