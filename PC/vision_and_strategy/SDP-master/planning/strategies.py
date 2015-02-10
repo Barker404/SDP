@@ -57,6 +57,7 @@ class DefenderPenalty(Strategy):
         Run around, blocking shots.
         """
         # Predict where they are aiming.
+        # LB: We can fiddle this for the penalty defence to know when we are allowed to move
         if self.ball.velocity > BALL_VELOCITY:
             predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.ball, bounce=False)
 
