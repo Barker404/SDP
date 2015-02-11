@@ -142,7 +142,7 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
                 # LB: potentially calculate careful turning speed based on angle
                 turnSpeed = 37 * multiplier
             else:
-                turnSpeed = 50 * multiplier
+                turnSpeed = 70 * multiplier
 
             if angle <= 0:
                 return {'left_motor': -turnSpeed, 'right_motor': turnSpeed}

@@ -204,9 +204,6 @@ class Milestone2Defender(Strategy):
             displacement, angle = self.our_defender.get_direction_to_point(x_aim, y)
             action = calculate_motor_speed(displacement, angle, backwards_ok=True)
 
-        if self.our_defender.catcher == 'open':
-            self.our_defender.catcher = 'closed'
-            action['catcher'] = 1
         return action
 
     def position(self):
@@ -217,9 +214,6 @@ class Milestone2Defender(Strategy):
         else:
             action = calculate_motor_speed(displacement, angle, careful=True)
 
-        if self.our_defender.catcher == 'closed':
-            self.our_defender.catcher = 'open'
-            action['catcher'] = 1
         return action
 
     def grab_ball(self):
