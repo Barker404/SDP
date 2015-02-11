@@ -1,6 +1,7 @@
 from utilities import *
 import math
 from random import randint
+import time
 
 class Strategy(object):
 
@@ -181,7 +182,7 @@ class Milestone2Attacker(Strategy):
         print angle
         if self.our_attacker.can_catch_ball(self.ball):
             self.current_state = self.GRAB_BALL
-            return do_nothing()
+            return {}
         else:
             return calculate_motor_speed(displacement, angle, careful=True)
 
@@ -195,13 +196,26 @@ class Milestone2Attacker(Strategy):
 
     def align(self):
         displacement, angle = self.our_attacker.get_direction_to_point(self.world.their_goal.x, self.world.their_goal.y)
-        return calculate_motor_speed(None, angle, careful=True)
+        action = calculate_motor_speed(None, angle, careful=True)
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
+            # time.sleep(1)
+            action = calculate_motor_speed(None, angle, careful=True)
+            if action['left_motor'] == 0 and action['right_motor'] == 0:
+                self.current_state = self.SHOOT
+                return do_nothing()
+            else:
+                return action
+        else:
+            return action
     
     def shoot(self):
-            self.our_attacker.catcher = 'open'
-            return kick_ball()
+        self.our_attacker.catcher = 'open'
+        self.current_state = self.FINISH
+        return kick_ball()
+
     
     def finish(self):
+        # self.current_state = self.PREPARE
         return do_nothing()
 # LB: THIS
 class DefenderGrab(Strategy):

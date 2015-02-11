@@ -18,7 +18,7 @@ class Controller:
     Primary source of robot control. Ties vision and planning together.
     """
 
-    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM0', comms=1):
+    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM1', comms=1):
         """
         Entry point for the SDP system.
 
@@ -220,17 +220,13 @@ class Robot_Controller(object):
 
             if 'kicker' in action and action['kicker'] != 0:
                 try:
-                    time.sleep(0.2)
-                    comm.write('RUN_KICK 50\r')
+                    comm.write('RUN_KICK 80\r')
                     # Let the kick finish before we tell it what else to do
-                    time.sleep(0.2)
                 except StandardError:
                     pass
             elif 'catcher' in action and action['catcher'] != 0:
                 try:
-                    time.sleep(0.2)
                     comm.write('RUN_CATCH\r')
-                    time.sleep(0.2)
                 except StandardError:
                     pass
 
@@ -250,6 +246,7 @@ class Arduino:
         self.timeout = timeOut
         self.last_command = ""
         self.setComms(comms)
+        self.increment_command=0
 
     def setComms(self, comms):
         if comms > 0:
@@ -270,7 +267,9 @@ class Arduino:
 
     def write(self, string):
         if self.comms == 1:
-            if self.last_command != string:
+            self.increment_command+=1;
+            if self.last_command != string or self.increment_command > 20:
+                self.increment_command=0;
                 print string
                 self.last_command = string
                 self.serial.write(string)
