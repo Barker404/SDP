@@ -6,7 +6,7 @@ from planning.models import Robot
 # (Below 30 and the motors will not spin)
 DISTANCE_MATCH_THRESHOLD = 15
 ANGLE_MATCH_THRESHOLD = pi/10
-BALL_ANGLE_THRESHOLD = pi/8
+BALL_ANGLE_THRESHOLD = pi/15
 MAX_DISPLACEMENT_SPEED = 690
 MAX_ANGLE_SPEED = 50
 BALL_VELOCITY = 3
@@ -119,25 +119,30 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
     '''
     Simplistic view of calculating the speed: no modes or trying to be careful
     '''
-    print angle
 
     if displacement is not None:
+        if careful:
+            threshold = BALL_ANGLE_THRESHOLD
+        else:
+            threshold = ANGLE_MATCH_THRESHOLD
+
         if displacement < DISTANCE_MATCH_THRESHOLD:
             return {'left_motor': 0, 'right_motor': 0}
-        elif abs(angle) > BALL_ANGLE_THRESHOLD:
+        elif abs(angle) > threshold:
             if careful:
                 # LB: potentially calculate careful turning speed based on angle
-                turnSpeed = 40
+                turnSpeed = 35
             else:
                 turnSpeed = 65
 
             if angle <= 0:
                 return {'left_motor': -turnSpeed, 'right_motor': turnSpeed}
-            else angle:
+            else:
                 return {'left_motor': turnSpeed, 'right_motor': -turnSpeed}
         else:
             if careful:
                 # LB: potentially calculate careful speed based on displacement
+                speed = 40
             else:
                 speed = 100    
             return {'left_motor': speed, 'right_motor': speed}

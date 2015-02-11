@@ -17,6 +17,7 @@ GOAL_WIDTH = 140
 GOAL_LENGTH = 1
 GOAL_HEIGHT = 10
 
+CATCHING_DISP_THRESHOLD = 10
 
 class Coordinate(object):
 
@@ -204,6 +205,18 @@ class Robot(PitchObject):
         self._catcher_area = area_dict
 
     @property
+    def catcher_area_plus(self):
+        height = self._catcher_area['height'] + CATCHING_DISP_THRESHOLD
+        width = self._catcher_area['width']
+        front_left = (self.x + self._catcher_area['front_offset'] + height, self.y + width/2.0)
+        front_right = (self.x + self._catcher_area['front_offset'] + height, self.y - width/2.0)
+        back_left = (self.x + self._catcher_area['front_offset'], self.y + width/2.0)
+        back_right = (self.x + self._catcher_area['front_offset'], self.y - width/2.0)
+        area = Polygon((front_left, front_right, back_left, back_right))
+        area.rotate(self.angle, self.x, self.y)
+        return area
+
+    @property
     def catcher(self):
         return self._catcher
 
@@ -216,7 +229,7 @@ class Robot(PitchObject):
         '''
         Get if the ball is in the catcher zone but may not have possession
         '''
-        return self.catcher_area.isInside(ball.x, ball.y)
+        return self.catcher_area_plus.isInside(ball.x, ball.y)
 
     def has_ball(self, ball):
         '''

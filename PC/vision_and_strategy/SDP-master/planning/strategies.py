@@ -174,6 +174,8 @@ class AttackerGrab(Strategy):
 
     def position(self):
         displacement, angle = self.our_attacker.get_direction_to_point(self.ball.x, self.ball.y)
+        print displacement
+        print angle
         if self.our_attacker.can_catch_ball(self.ball):
             self.current_state = self.GRAB_BALL
             return do_nothing()
