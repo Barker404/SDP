@@ -6,7 +6,7 @@ from planning.models import Robot
 # (Below 30 and the motors will not spin)
 DISTANCE_MATCH_THRESHOLD = 15
 ANGLE_MATCH_THRESHOLD = pi/10
-BALL_ANGLE_THRESHOLD = pi/20
+BALL_ANGLE_THRESHOLD = pi/8
 MAX_DISPLACEMENT_SPEED = 690
 MAX_ANGLE_SPEED = 50
 BALL_VELOCITY = 3
@@ -119,40 +119,65 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
     '''
     Simplistic view of calculating the speed: no modes or trying to be careful
     '''
-    moving_backwards = False
-    # LB: Lovely magic numbers
-    general_speed = 95 if careful else 300
-    angle_thresh = BALL_ANGLE_THRESHOLD if careful else ANGLE_MATCH_THRESHOLD
+    print angle
 
-    if backwards_ok and abs(angle) > pi/2:
-        angle = (-pi + angle) if angle > 0 else (pi + angle)
-        moving_backwards = True
-
-    if not (displacement is None):
-
+    if displacement is not None:
         if displacement < DISTANCE_MATCH_THRESHOLD:
-            return {'left_motor': 0, 'right_motor': 0, 'speed': general_speed}
-
-        elif abs(angle) > angle_thresh:
-            speed = (angle/pi) * MAX_ANGLE_SPEED
-            return {'left_motor': -speed, 'right_motor': speed, 'speed': general_speed}
-
-        else:
-            speed = log(displacement, 10) * MAX_DISPLACEMENT_SPEED
-            speed = -speed if moving_backwards else speed
+            return {'left_motor': 0, 'right_motor': 0}
+        elif abs(angle) > BALL_ANGLE_THRESHOLD:
             if careful:
-                return {'left_motor': speed, 'right_motor': speed, 'speed': 1000/(1+10**(-0.1*(displacement-85)))}
-            return {'left_motor': speed, 'right_motor': speed, 'speed': 1000/(1+10**(-0.1*(displacement-30)))}
+                # LB: potentially calculate careful turning speed based on angle
+                turnSpeed = 40
+            else:
+                turnSpeed = 65
+
+            if angle <= 0:
+                return {'left_motor': -turnSpeed, 'right_motor': turnSpeed}
+            else angle:
+                return {'left_motor': turnSpeed, 'right_motor': -turnSpeed}
+        else:
+            if careful:
+                # LB: potentially calculate careful speed based on displacement
+            else:
+                speed = 100    
+            return {'left_motor': speed, 'right_motor': speed}
 
     else:
+        return {'left_motor': 0, 'right_motor': 0}
 
-        if abs(angle) > angle_thresh:
-            speed = (angle/pi) * MAX_ANGLE_SPEED
-            return {'left_motor': -speed, 'right_motor': speed, 'speed': general_speed}
+    # moving_backwards = False
+    # # LB: Lovely magic numbers
+    # general_speed = 95 if careful else 300
+    # angle_thresh = BALL_ANGLE_THRESHOLD if careful else ANGLE_MATCH_THRESHOLD
 
-        else:
-            return {'left_motor': 0, 'right_motor': 0, 'speed': general_speed}
+    # if backwards_ok and abs(angle) > pi/2:
+    #     angle = (-pi + angle) if angle > 0 else (pi + angle)
+    #     moving_backwards = True
 
+    # if not (displacement is None):
+
+    #     if displacement < DISTANCE_MATCH_THRESHOLD:
+    #         return {'left_motor': 0, 'right_motor': 0, 'speed': general_speed}
+
+    #     elif abs(angle) > angle_thresh:
+    #         speed = (angle/pi) * MAX_ANGLE_SPEED
+    #         return {'left_motor': -speed, 'right_motor': speed, 'speed': general_speed}
+
+    #     else:
+    #         speed = log(displacement, 10) * MAX_DISPLACEMENT_SPEED
+    #         speed = -speed if moving_backwards else speed
+    #         if careful:
+    #             return {'left_motor': speed, 'right_motor': speed, 'speed': 1000/(1+10**(-0.1*(displacement-85)))}
+    #         return {'left_motor': speed, 'right_motor': speed, 'speed': 1000/(1+10**(-0.1*(displacement-30)))}
+
+    # else:
+
+    #     if abs(angle) > angle_thresh:
+    #         speed = (angle/pi) * MAX_ANGLE_SPEED
+    #         return {'left_motor': -speed, 'right_motor': speed, 'speed': general_speed}
+
+    #     else:
+    #         return {'left_motor': 0, 'right_motor': 0, 'speed': general_speed}
 
 
 def do_nothing():
