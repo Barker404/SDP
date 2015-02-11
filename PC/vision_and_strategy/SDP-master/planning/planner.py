@@ -24,15 +24,15 @@ class Planner:
         # LB: Magic numbers!
         # These should surely be constants in models.py?
         # Also need to make sure grabber area is consistent with our robot
-        self._world.our_defender.catcher_area = {'width' : 20, 'height' : 18, 'front_offset' : 12} #10
-        self._world.our_attacker.catcher_area = {'width' : 20, 'height' : 18, 'front_offset' : 14}
+        self._world.our_defender.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 12} #10
+        self._world.our_attacker.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 14}
 
         # self._defender_defence_strat = DefenderDefence(self._world)
         # self._defender_attack_strat = DefaultDefenderAttack(self._world)
 
-        self._attacker_strategies = { 'defence' : [AttackerGrab] }
+        self._attacker_strategies = { 'milestone2' : [Milestone2Attacker] }
         # 'defence' : [AttackerDefend],
-        #                              'grab' : [AttackerGrab, AttackerGrabCareful],
+        #                              'grab' : [Milestone2Attacker, Milestone2AttackerCareful],
         #                              'score' : [AttackerDriveByTurn, AttackerDriveBy, AttackerTurnScore, AttackerScoreDynamic],
         #                              'catch' : [AttackerPositionCatch, AttackerCatch]}
 
@@ -44,7 +44,7 @@ class Planner:
         self._defender_state = 'defence'
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
 
-        self._attacker_state = 'defence'
+        self._attacker_state = 'milestone2'
         self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
 
     # LB: Only chooses the first possible strategy? Is this correct?
@@ -73,7 +73,7 @@ class Planner:
     @attacker_state.setter
     def attacker_state(self, new_state):
         # LB: assertion looks strange - state is set to things like "grab" at some points - check this
-        assert new_state in ['defence', 'attack']
+        assert new_state in ['defence', 'attack', 'milestone2']
         self._attacker_state = new_state
 
     @property
@@ -102,9 +102,9 @@ class Planner:
             return self._defender_current_strategy.generate()
 
         if robot == 'attacker':
-            if not self._attacker_state == 'defence':
-                self._attacker_state = 'defence'
-            if not isinstance(self._attacker_current_strategy, AttackerGrab):
+            if not self._attacker_state == 'milestone2':
+                self._attacker_state = 'milestone2'
+            if not isinstance(self._attacker_current_strategy, Milestone2Attacker):
                 self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
             return self._attacker_current_strategy.generate()
 
@@ -171,11 +171,11 @@ class Planner:
                 elif self._attacker_state == 'grab':
                     # Switch to careful mode if the ball is too close to the wall.
                     if abs(self._world.ball.y - self._world.pitch.height) < 0 or abs(self._world.ball.y) < 0:
-                        if isinstance(self._attacker_current_strategy, AttackerGrab):
-                            self._attacker_current_strategy = AttackerGrabCareful(self._world)
+                        if isinstance(self._attacker_current_strategy, Milestone2Attacker):
+                            self._attacker_current_strategy = Milestone2AttackerCareful(self._world)
                     else:
-                        if isinstance(self._attacker_current_strategy, AttackerGrabCareful):
-                            self._attacker_current_strategy = AttackerGrab(self._world)
+                        if isinstance(self._attacker_current_strategy, Milestone2AttackerCareful):
+                            self._attacker_current_strategy = Milestone2Attacker(self._world)
 
                 # Check if we should switch from a defence to a grabbing strategy.
                 elif self._attacker_state in ['defence', 'catch'] :

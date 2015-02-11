@@ -146,19 +146,22 @@ class DefenderDefence(Strategy):
             return self.world.our_goal.x - self.GOAL_ALIGN_OFFSET
 
 # LB: THIS
-class AttackerGrab(Strategy):
+class Milestone2Attacker(Strategy):
 
-    PREPARE, GO_TO_BALL, GRAB_BALL, GRABBED = 'PREPARE', 'GO_TO_BALL', 'GRAB_BALL', 'GRABBED'
-    STATES = [PREPARE, GO_TO_BALL, GRAB_BALL, GRABBED]
+    PREPARE, GO_TO_BALL, GRAB_BALL, ALIGN, SHOOT, FINISH = \
+        'PREPARE', 'GO_TO_BALL', 'GRAB_BALL', 'ALIGN', 'SHOOT', 'FINISH'
+    STATES = [PREPARE, GO_TO_BALL, GRAB_BALL, ALIGN, SHOOT, FINISH]
 
     def __init__(self, world):
-        super(AttackerGrab, self).__init__(world, self.STATES)
+        super(Milestone2Attacker, self).__init__(world, self.STATES)
 
         self.NEXT_ACTION_MAP = {
             self.PREPARE: self.prepare,
             self.GO_TO_BALL: self.position,
             self.GRAB_BALL: self.grab,
-            self.GRABBED: do_nothing
+            self.ALIGN: self.align,
+            self.SHOOT: self.shoot,
+            self.FINISH: self.finish
         }
 
         self.our_attacker = self.world.our_attacker
@@ -184,12 +187,22 @@ class AttackerGrab(Strategy):
 
     def grab(self):
         if self.our_attacker.has_ball(self.ball):
-            self.current_state = self.GRABBED
+            self.current_state = self.ALIGN
             return do_nothing()
         else:
             self.our_attacker.catcher = 'closed'
             return grab_ball()
 
+    def align(self):
+        displacement, angle = self.our_attacker.get_direction_to_point(self.world.their_goal.x, self.world.their_goal.y)
+        return calculate_motor_speed(None, angle, careful=True)
+    
+    def shoot(self):
+            self.our_attacker.catcher = 'open'
+            return kick_ball()
+    
+    def finish(self):
+        return do_nothing()
 # LB: THIS
 class DefenderGrab(Strategy):
 

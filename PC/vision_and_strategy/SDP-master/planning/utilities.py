@@ -120,18 +120,17 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
     Simplistic view of calculating the speed: no modes or trying to be careful
     '''
 
+    if careful:
+        threshold = BALL_ANGLE_THRESHOLD
+    else:
+        threshold = ANGLE_MATCH_THRESHOLD
     if displacement is not None:
-        if careful:
-            threshold = BALL_ANGLE_THRESHOLD
-        else:
-            threshold = ANGLE_MATCH_THRESHOLD
-
         if displacement < DISTANCE_MATCH_THRESHOLD:
             return {'left_motor': 0, 'right_motor': 0}
         elif abs(angle) > threshold:
             if careful:
                 # LB: potentially calculate careful turning speed based on angle
-                turnSpeed = 35
+                turnSpeed = 37
             else:
                 turnSpeed = 65
 
@@ -146,7 +145,21 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
             else:
                 speed = 100    
             return {'left_motor': speed, 'right_motor': speed}
+    elif angle is not None:
+        if abs(angle) > threshold:
+            # LB: copied code! change later
+            if careful:
+                # LB: potentially calculate careful turning speed based on angle
+                turnSpeed = 50
+            else:
+                turnSpeed = 65
 
+            if angle <= 0:
+                return {'left_motor': -turnSpeed, 'right_motor': turnSpeed}
+            else:
+                return {'left_motor': turnSpeed, 'right_motor': -turnSpeed}
+        else:
+            return {'left_motor': 0, 'right_motor': 0}
     else:
         return {'left_motor': 0, 'right_motor': 0}
 

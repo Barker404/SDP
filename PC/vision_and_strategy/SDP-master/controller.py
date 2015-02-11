@@ -203,32 +203,36 @@ class Robot_Controller(object):
 
         # Do whatever actions are specified in the action dict
         # To kick without affecting wheels, don't send 'left_motor' or 'right_motor' at all
-        if 'left_motor' in action or 'right_motor' in action:
-            left_motor = 0
-            right_motor = 0
-            if 'left_motor' in action:
-                left_motor = int(action['left_motor'])
-            if 'right_motor' in action:
-                right_motor = int(action['right_motor'])
-            msg = 'RUN_ENG %d %d\r' % (max(min(left_motor, 99), -99), max(min(right_motor, 99), -99))
-            comm.write(msg)
+        if action is not None:
+            if 'left_motor' in action or 'right_motor' in action:
+                left_motor = 0
+                right_motor = 0
+                if 'left_motor' in action:
+                    left_motor = int(action['left_motor'])
+                if 'right_motor' in action:
+                    right_motor = int(action['right_motor'])
+                msg = 'RUN_ENG %d %d\r' % (max(min(left_motor, 99), -99), max(min(right_motor, 99), -99))
+                comm.write(msg)
 
-        if 'speed' in action:
-            # LB: need to decide whether to use this or not
-            speed = action['speed']
+            if 'speed' in action:
+                # LB: need to decide whether to use this or not
+                speed = action['speed']
 
-        if 'kicker' in action and action['kicker'] != 0:
-            try:
-                comm.write('RUN_KICK 50\r')
-                # Let the kick finish before we tell it what else to do
-                time.sleep(0.5)
-            except StandardError:
-                pass
-        elif 'catcher' in action and action['catcher'] != 0:
-            try:
-                comm.write('RUN_CATCH\r')
-            except StandardError:
-                pass
+            if 'kicker' in action and action['kicker'] != 0:
+                try:
+                    time.sleep(0.2)
+                    comm.write('RUN_KICK 50\r')
+                    # Let the kick finish before we tell it what else to do
+                    time.sleep(0.2)
+                except StandardError:
+                    pass
+            elif 'catcher' in action and action['catcher'] != 0:
+                try:
+                    time.sleep(0.2)
+                    comm.write('RUN_CATCH\r')
+                    time.sleep(0.2)
+                except StandardError:
+                    pass
 
     def shutdown(self, comm):
         comm.write('RUN_ENG %d %d\r' % (0, 0))
