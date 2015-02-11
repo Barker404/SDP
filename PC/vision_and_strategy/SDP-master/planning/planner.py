@@ -94,9 +94,21 @@ class Planner:
     # But we need to check if it is used anywhere without the parameter
     def plan(self, robot='attacker'):
         # Test
-        self._defender_state = 'defence'
-        self._defender_current_strategy = self.choose_defender_strategy(self._world)
-        return self._defender_current_strategy.generate()
+        if robot == 'defender':
+            if not self._defender_state == 'defence':
+                self._defender_state = 'defence'
+            if not isinstance(self._defender_current_strategy, DefenderDefence):
+                self._defender_current_strategy = self.choose_defender_strategy(self._world)
+            return self._defender_current_strategy.generate()
+
+        if robot == 'attacker':
+            if not self._attacker_state == 'defence':
+                self._attacker_state = 'defence'
+            if not isinstance(self._attacker_current_strategy, AttackerGrab):
+                self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
+            return self._attacker_current_strategy.generate()
+
+
 
 
 
