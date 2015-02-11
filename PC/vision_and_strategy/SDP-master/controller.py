@@ -18,7 +18,7 @@ class Controller:
     Primary source of robot control. Ties vision and planning together.
     """
 
-    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM1', comms=1, attacking=False):
+    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM0', comms=1, attacking=False):
         """
         Entry point for the SDP system.
 
@@ -118,8 +118,6 @@ class Controller:
                     attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
                 else:   
                     defender_actions = self.planner.plan('defender')
-
-                    print defender_actions
 
                     if self.robot is not None:
                         self.robot.execute(self.arduino, defender_actions)

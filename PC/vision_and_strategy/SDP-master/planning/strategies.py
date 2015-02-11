@@ -62,8 +62,6 @@ class Milestone2Attacker(Strategy):
 
     def position(self):
         displacement, angle = self.our_attacker.get_direction_to_point(self.ball.x, self.ball.y)
-        print displacement
-        print angle
         if self.our_attacker.can_catch_ball(self.ball):
             self.current_state = self.GRAB_BALL
             return {}
@@ -104,8 +102,9 @@ class Milestone2Attacker(Strategy):
 
 class Milestone2Defender(Strategy):
 
-    DEFEND_GOAL = 'DEFEND_GOAL'
-    STATES = [DEFEND_GOAL]
+    STAY, TURN, DEFEND_GOAL, POSITION, GRAB_BALL, ALIGN, SHOOT, FINISH = \
+        'STAY', 'TURN', 'DEFEND_GOAL', 'POSITION', 'GRAB_BALL', 'ALIGN', 'SHOOT', 'FINISH'
+    STATES = [STAY, TURN, DEFEND_GOAL, POSITION, GRAB_BALL, ALIGN, SHOOT, FINISH]
     LEFT, RIGHT = 'left', 'right'
     SIDES = [LEFT, RIGHT]
 
@@ -115,7 +114,14 @@ class Milestone2Defender(Strategy):
         super(Milestone2Defender, self).__init__(world, self.STATES)
 
         self.NEXT_ACTION_MAP = {
-            self.DEFEND_GOAL: self.defend_goal
+            self.STAY: self.stay,
+            self.TURN: self.turn,
+            self.DEFEND_GOAL: self.defend_goal,
+            self.POSITION: self.position,
+            self.GRAB_BALL: self.grab_ball,
+            self.ALIGN: self.align,
+            self.SHOOT: self.shoot,
+            self.FINISH: self.finish
         }
 
         self.our_goal = self.world.our_goal
@@ -138,25 +144,117 @@ class Milestone2Defender(Strategy):
     #             self.goal_front_x, self.our_goal.y)
     #         return calculate_motor_speed(displacement, angle, backwards_ok=True)
 
-    def defend_goal(self):
-        """
-        Run around, blocking shots.
-        """
+
+    def stay(self):
+        kicker_threshold = 3
+        if self.ball.velocity > kicker_threshold and self.ball.velocity<50 :
+            self.current_state = self.DEFEND_GOAL
+            return do_nothing()
+        else:
+            return do_nothing()
+
+    def turn(self):        
         predicted_y = None
         # Predict where they are aiming.
         if self.ball.velocity > BALL_VELOCITY:
             predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.ball, bounce=False)
 
+        if predicted_y is None:
+            predicted_y = self.ball.y
+
+        print predicted_y
+
+        displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x + 30, predicted_y)
+
+        print angle
+
+        action = calculate_motor_speed(None, angle)
+
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
+            self.current_state = self.DEFEND_GOAL
+            return do_nothing()
+        else:
+            return action
+
+    def defend_goal(self):
+        """
+        Run around, blocking shots.
+        """
+
+        if (self.ball.angle > (5.0/4.0)*pi or self.ball.angle < (3.0/4.0)*pi or self.ball.velocity < BALL_VELOCITY) and abs(self.ball.x - self.our_defender.x) < 80:
+            self.current_state = self.POSITION
+            return do_nothing()
+
+        x_aim = self.our_defender.x
+
+        predicted_y = None
+        # Predict where they are aiming.
+        if self.ball.velocity > BALL_VELOCITY:
+            predicted_y = predict_y_intersection(self.world, x_aim, self.ball, bounce=False)
+
+        print predicted_y
         if predicted_y is not None:
-            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
+            displacement, angle = self.our_defender.get_direction_to_point(x_aim,
                                                                            predicted_y - 7*math.sin(self.our_defender.angle))
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
+            action = calculate_motor_speed(displacement, angle, backwards_ok=True)
         else:
             y = self.ball.y
             y = max([y, 60])
             y = min([y, self.world._pitch.height - 60])
-            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x, y)
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
+            displacement, angle = self.our_defender.get_direction_to_point(x_aim, y)
+            action = calculate_motor_speed(displacement, angle, backwards_ok=True)
+
+        if self.our_defender.catcher == 'open':
+            self.our_defender.catcher = 'closed'
+            action['catcher'] = 1
+        return action
+
+    def position(self):
+        displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
+        if self.our_defender.can_catch_ball(self.ball):
+            self.current_state = self.GRAB_BALL
+            action = {}
+        else:
+            action = calculate_motor_speed(displacement, angle, careful=True)
+
+        if self.our_defender.catcher == 'closed':
+            self.our_defender.catcher = 'open'
+            action['catcher'] = 1
+        return action
+
+    def grab_ball(self):
+        if self.our_defender.has_ball(self.ball):
+            self.current_state = self.ALIGN
+            return do_nothing()
+        else:
+            self.our_defender.catcher = 'closed'
+            return grab_ball()
+
+    def align(self):
+        displacement, angle = self.our_defender.get_direction_to_point(self.world.their_goal.x, self.world.their_goal.y)
+        action = calculate_motor_speed(None, angle, careful=True)
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
+            # time.sleep(1)
+            action = calculate_motor_speed(None, angle, careful=True)
+            if action['left_motor'] == 0 and action['right_motor'] == 0:
+                self.current_state = self.SHOOT
+                return do_nothing()
+            else:
+                return action
+        else:
+            return action
+    
+    def shoot(self):
+        self.our_defender.catcher = 'open'
+        self.current_state = self.FINISH
+        return kick_ball()
+
+    
+    def finish(self):
+        # self.current_state = self.PREPARE
+        return do_nothing()
+
+
 
     def get_alignment_position(self, side):
         """
