@@ -107,7 +107,7 @@ class Controller:
 
 
                 # test
-                attacking = False
+                attacking = True
 
 
 
@@ -179,6 +179,7 @@ class Robot_Controller(object):
         Initialise variables
         """
         self.current_speed = 0
+        self.last_command = ""
 
     def execute(self, comm, action):
         """
@@ -218,7 +219,7 @@ class Robot_Controller(object):
 
         if 'kicker' in action and action['kicker'] != 0:
             try:
-                comm.write('RUN_KICK\r')
+                comm.write('RUN_KICK 50\r')
                 # Let the kick finish before we tell it what else to do
                 time.sleep(0.5)
             except StandardError:
@@ -230,8 +231,9 @@ class Robot_Controller(object):
                 pass
 
     def shutdown(self, comm):
-        comm.write('RUN_KICK\r')
         comm.write('RUN_ENG %d %d\r' % (0, 0))
+        time.sleep(1)
+        comm.write('RUN_KICK 50\r')
 
 
 class Arduino:
@@ -242,8 +244,8 @@ class Arduino:
         self.port = port
         self.rate = rate
         self.timeout = timeOut
+        self.last_command = ""
         self.setComms(comms)
-        self.thing = 0
 
     def setComms(self, comms):
         if comms > 0:
@@ -264,10 +266,11 @@ class Arduino:
 
     def write(self, string):
         if self.comms == 1:
-            if self.thing % 50 == 0:
+            if self.last_command != string:
                 print string
+                self.last_command = string
                 self.serial.write(string)
-        self.thing += 1
+
 
 
 if __name__ == '__main__':
