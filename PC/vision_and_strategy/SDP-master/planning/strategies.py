@@ -31,122 +31,6 @@ class Strategy(object):
     def generate(self):
         return self.NEXT_ACTION_MAP[self.current_state]()
 
-# LB: THIS, simplified maybe?
-class DefenderPenalty(Strategy):
-
-
-    DEFEND_GOAL = 'DEFEND_GOAL'
-    STATES = [DEFEND_GOAL]
-    LEFT, RIGHT = 'left', 'right'
-    SIDES = [LEFT, RIGHT]
-
-
-    def __init__(self, world):
-        super(DefenderPenalty, self).__init__(world, self.STATES)
-
-        self.NEXT_ACTION_MAP = {
-            self.DEFEND_GOAL: self.defend_goal
-        }
-
-        self.their_attacker = self.world.their_attacker
-        self.our_defender = self.world.our_defender
-        self.ball = self.world.ball
-
-
-    def defend_goal(self):
-        """
-        Run around, blocking shots.
-        """
-        # Predict where they are aiming.
-        # LB: We can fiddle this for the penalty defence to know when we are allowed to move
-        if self.ball.velocity > BALL_VELOCITY:
-            predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.ball, bounce=False)
-
-        if self.ball.velocity <= BALL_VELOCITY or predicted_y is None: 
-            predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.their_attacker, bounce=False)
-
-        if predicted_y is not None:
-            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
-                                                                           predicted_y - 7*math.sin(self.our_defender.angle))
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
-        else:
-            y = self.ball.y
-            y = max([y, 60])
-            y = min([y, self.world._pitch.height - 60])
-            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x, y)
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
-
-# LB: THIS
-class DefenderDefence(Strategy):
-
-    UNALIGNED, DEFEND_GOAL = 'UNALIGNED', 'DEFEND_GOAL'
-    STATES = [UNALIGNED, DEFEND_GOAL]
-    LEFT, RIGHT = 'left', 'right'
-    SIDES = [LEFT, RIGHT]
-
-    GOAL_ALIGN_OFFSET = 60
-
-    def __init__(self, world):
-        super(DefenderDefence, self).__init__(world, self.STATES)
-
-        self.NEXT_ACTION_MAP = {
-            self.UNALIGNED: self.align,
-            self.DEFEND_GOAL: self.defend_goal
-        }
-
-        self.our_goal = self.world.our_goal
-        # Find the point we want to align to.
-        self.goal_front_x = self.get_alignment_position(self.world._our_side)
-        self.their_attacker = self.world.their_attacker
-        self.our_defender = self.world.our_defender
-        self.ball = self.world.ball
-
-    def align(self):
-        """
-        Align yourself with the center of our goal.
-        """
-        if has_matched(self.our_defender, x=self.goal_front_x, y=self.our_goal.y):
-            # We're there. Advance the states and formulate next action.
-            self.current_state = self.DEFEND_GOAL
-            return do_nothing()
-        else:
-            displacement, angle = self.our_defender.get_direction_to_point(
-                self.goal_front_x, self.our_goal.y)
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
-
-    def defend_goal(self):
-        """
-        Run around, blocking shots.
-        """
-        # Predict where they are aiming.
-        if self.ball.velocity > BALL_VELOCITY:
-            predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.ball, bounce=False)
-
-        if self.ball.velocity <= BALL_VELOCITY or predicted_y is None: 
-            predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.their_attacker, bounce=False)
-
-        if predicted_y is not None:
-            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
-                                                                           predicted_y - 7*math.sin(self.our_defender.angle))
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
-        else:
-            y = self.ball.y
-            y = max([y, 60])
-            y = min([y, self.world._pitch.height - 60])
-            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x, y)
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
-
-    def get_alignment_position(self, side):
-        """
-        Given the side, find the x coordinate of where we need to align to initially.
-        """
-        assert side in self.SIDES
-        if side == self.LEFT:
-            return self.world.our_goal.x + self.GOAL_ALIGN_OFFSET
-        else:
-            return self.world.our_goal.x - self.GOAL_ALIGN_OFFSET
-
-# LB: THIS
 class Milestone2Attacker(Strategy):
 
     PREPARE, GO_TO_BALL, GRAB_BALL, ALIGN, SHOOT, FINISH = \
@@ -217,6 +101,120 @@ class Milestone2Attacker(Strategy):
     def finish(self):
         # self.current_state = self.PREPARE
         return do_nothing()
+
+class Milestone2Defender(Strategy):
+
+    DEFEND_GOAL = 'DEFEND_GOAL'
+    STATES = [DEFEND_GOAL]
+    LEFT, RIGHT = 'left', 'right'
+    SIDES = [LEFT, RIGHT]
+
+    GOAL_ALIGN_OFFSET = 60
+
+    def __init__(self, world):
+        super(Milestone2Defender, self).__init__(world, self.STATES)
+
+        self.NEXT_ACTION_MAP = {
+            self.DEFEND_GOAL: self.defend_goal
+        }
+
+        self.our_goal = self.world.our_goal
+        # Find the point we want to align to.
+        self.goal_front_x = self.get_alignment_position(self.world._our_side)
+        self.their_attacker = self.world.their_attacker
+        self.our_defender = self.world.our_defender
+        self.ball = self.world.ball
+
+    # def align(self):
+    #     """
+    #     Align yourself with the center of our goal.
+    #     """
+    #     if has_matched(self.our_defender, x=self.goal_front_x, y=self.our_goal.y):
+    #         # We're there. Advance the states and formulate next action.
+    #         self.current_state = self.DEFEND_GOAL
+    #         return do_nothing()
+    #     else:
+    #         displacement, angle = self.our_defender.get_direction_to_point(
+    #             self.goal_front_x, self.our_goal.y)
+    #         return calculate_motor_speed(displacement, angle, backwards_ok=True)
+
+    def defend_goal(self):
+        """
+        Run around, blocking shots.
+        """
+        predicted_y = None
+        # Predict where they are aiming.
+        if self.ball.velocity > BALL_VELOCITY:
+            predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.ball, bounce=False)
+
+        if predicted_y is not None:
+            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
+                                                                           predicted_y - 7*math.sin(self.our_defender.angle))
+            return calculate_motor_speed(displacement, angle, backwards_ok=True)
+        else:
+            y = self.ball.y
+            y = max([y, 60])
+            y = min([y, self.world._pitch.height - 60])
+            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x, y)
+            return calculate_motor_speed(displacement, angle, backwards_ok=True)
+
+    def get_alignment_position(self, side):
+        """
+        Given the side, find the x coordinate of where we need to align to initially.
+        """
+        assert side in self.SIDES
+        if side == self.LEFT:
+            return self.world.our_goal.x + self.GOAL_ALIGN_OFFSET
+        else:
+            return self.world.our_goal.x - self.GOAL_ALIGN_OFFSET
+
+
+# LB: THIS, simplified maybe?
+class DefenderPenalty(Strategy):
+
+
+    DEFEND_GOAL = 'DEFEND_GOAL'
+    STATES = [DEFEND_GOAL]
+    LEFT, RIGHT = 'left', 'right'
+    SIDES = [LEFT, RIGHT]
+
+
+    def __init__(self, world):
+        super(DefenderPenalty, self).__init__(world, self.STATES)
+
+        self.NEXT_ACTION_MAP = {
+            self.DEFEND_GOAL: self.defend_goal
+        }
+
+        self.their_attacker = self.world.their_attacker
+        self.our_defender = self.world.our_defender
+        self.ball = self.world.ball
+
+
+    def defend_goal(self):
+        """
+        Run around, blocking shots.
+        """
+        # Predict where they are aiming.
+        # LB: We can fiddle this for the penalty defence to know when we are allowed to move
+        if self.ball.velocity > BALL_VELOCITY:
+            predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.ball, bounce=False)
+
+        if self.ball.velocity <= BALL_VELOCITY or predicted_y is None: 
+            predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.their_attacker, bounce=False)
+
+        if predicted_y is not None:
+            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
+                                                                           predicted_y - 7*math.sin(self.our_defender.angle))
+            return calculate_motor_speed(displacement, angle, backwards_ok=True)
+        else:
+            y = self.ball.y
+            y = max([y, 60])
+            y = min([y, self.world._pitch.height - 60])
+            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x, y)
+            return calculate_motor_speed(displacement, angle, backwards_ok=True)
+
+# LB: THIS
 # LB: THIS
 class DefenderGrab(Strategy):
 

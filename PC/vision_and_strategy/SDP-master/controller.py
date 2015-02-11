@@ -18,7 +18,7 @@ class Controller:
     Primary source of robot control. Ties vision and planning together.
     """
 
-    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM1', comms=1):
+    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM1', comms=1, attacking=False):
         """
         Entry point for the SDP system.
 
@@ -38,7 +38,7 @@ class Controller:
         assert our_side in ['left', 'right']
 
         self.pitch = pitch
-
+        self.attacking = attacking
         # Set up the Arduino communications
         self.arduino = Arduino(comm_port, 115200, 1, comms)
 
@@ -105,16 +105,8 @@ class Controller:
                 attackerState = None
                 defenderState = None
 
-
-                # test
-                attacking = True
-
-
-
-
-
                 # Milestone 2: we are either attacking or defending
-                if attacking:
+                if self.attacking:
                     # LB: again with the two robots
                     attacker_actions = self.planner.plan('attacker')
 
@@ -221,6 +213,7 @@ class Robot_Controller(object):
             if 'kicker' in action and action['kicker'] != 0:
                 try:
                     comm.write('RUN_KICK 80\r')
+                    comm.write('RUN_KICK 80\r')
                     # Let the kick finish before we tell it what else to do
                 except StandardError:
                     pass
@@ -283,12 +276,14 @@ if __name__ == '__main__':
     parser.add_argument("side", help="The side of our defender ['left', 'right'] allowed.")
     parser.add_argument("color", help="The color of our team - ['yellow', 'blue'] allowed.")
     parser.add_argument(
+        "-a", "--attack", help="attack b*tch", action="store_true")
+    parser.add_argument(
         "-n", "--nocomms", help="Disables sending commands to the robot.", action="store_true")
 
     args = parser.parse_args()
     if args.nocomms:
         c = Controller(
-            pitch=int(args.pitch), color=args.color, our_side=args.side, comms=0).wow()
+            pitch=int(args.pitch), color=args.color, our_side=args.side, comms=0, attacking=args.attack).wow()
     else:
         c = Controller(
-            pitch=int(args.pitch), color=args.color, our_side=args.side).wow()
+            pitch=int(args.pitch), color=args.color, our_side=args.side, attacking=args.attack).wow()

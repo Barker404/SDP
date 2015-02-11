@@ -36,12 +36,12 @@ class Planner:
         #                              'score' : [AttackerDriveByTurn, AttackerDriveBy, AttackerTurnScore, AttackerScoreDynamic],
         #                              'catch' : [AttackerPositionCatch, AttackerCatch]}
 
-        self._defender_strategies = {'defence' : [DefenderDefence] }
+        self._defender_strategies = {'milestone2' : [Milestone2Defender] }
         # , DefenderPenalty],
         #                              'grab' : [DefenderGrab],
         #                              'pass' : [DefenderBouncePass]}
 
-        self._defender_state = 'defence'
+        self._defender_state = 'milestone2'
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
 
         self._attacker_state = 'milestone2'
@@ -83,7 +83,7 @@ class Planner:
     @defender_state.setter
     def defender_state(self, new_state):
         # LB: assertion looks strange - state is set to things like "grab" at some points - check this
-        assert new_state in ['defence', 'attack']
+        assert new_state in ['defence', 'attack', 'milestone2']
         self._defender_state = new_state
 
     def update_world(self, position_dictionary):
@@ -95,9 +95,9 @@ class Planner:
     def plan(self, robot='attacker'):
         # Test
         if robot == 'defender':
-            if not self._defender_state == 'defence':
-                self._defender_state = 'defence'
-            if not isinstance(self._defender_current_strategy, DefenderDefence):
+            if not self._defender_state == 'milestone2':
+                self._defender_state = 'milestone2'
+            if not isinstance(self._defender_current_strategy, Milestone2Defender):
                 self._defender_current_strategy = self.choose_defender_strategy(self._world)
             return self._defender_current_strategy.generate()
 
