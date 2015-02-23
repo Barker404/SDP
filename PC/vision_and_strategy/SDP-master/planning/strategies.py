@@ -80,7 +80,6 @@ class Milestone2Attacker(Strategy):
         displacement, angle = self.our_attacker.get_direction_to_point(self.world.their_goal.x, self.world.their_goal.y)
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
-            # time.sleep(1)
             action = calculate_motor_speed(None, angle, careful=True)
             if action['left_motor'] == 0 and action['right_motor'] == 0:
                 self.current_state = self.SHOOT
@@ -97,7 +96,6 @@ class Milestone2Attacker(Strategy):
 
     
     def finish(self):
-        # self.current_state = self.PREPARE
         return do_nothing()
 
 class Milestone2Defender(Strategy):
@@ -125,25 +123,9 @@ class Milestone2Defender(Strategy):
         }
 
         self.our_goal = self.world.our_goal
-        # Find the point we want to align to.
-        self.goal_front_x = self.get_alignment_position(self.world._our_side)
         self.their_attacker = self.world.their_attacker
         self.our_defender = self.world.our_defender
         self.ball = self.world.ball
-
-    # def align(self):
-    #     """
-    #     Align yourself with the center of our goal.
-    #     """
-    #     if has_matched(self.our_defender, x=self.goal_front_x, y=self.our_goal.y):
-    #         # We're there. Advance the states and formulate next action.
-    #         self.current_state = self.DEFEND_GOAL
-    #         return do_nothing()
-    #     else:
-    #         displacement, angle = self.our_defender.get_direction_to_point(
-    #             self.goal_front_x, self.our_goal.y)
-    #         return calculate_motor_speed(displacement, angle, backwards_ok=True)
-
 
     def stay(self):
         kicker_threshold = 3
@@ -181,7 +163,15 @@ class Milestone2Defender(Strategy):
         Run around, blocking shots.
         """
 
-        if (self.ball.angle > (5.0/4.0)*pi or self.ball.angle < (3.0/4.0)*pi or self.ball.velocity < BALL_VELOCITY) and abs(self.ball.x - self.our_defender.x) < 80:
+        # LB: IMPORTANT - only works from one side of pitch
+
+        # Move to pick up the ball if it has stopped moving roughly towards you
+        # or if it has stopped moving altogether
+        # and it is close to us
+        if ((self.ball.angle > (5.0/4.0)*pi or 
+                self.ball.angle < (3.0/4.0)*pi or 
+                self.ball.velocity < BALL_VELOCITY) and 
+                abs(self.ball.x - self.our_defender.x) < 80):
             self.current_state = self.POSITION
             return do_nothing()
 
@@ -216,6 +206,9 @@ class Milestone2Defender(Strategy):
 
         return action
 
+    # LB: In the milestone we saw the robot fail to grab the ball at this state 
+    # and end up looping here constantly grabbing the ball
+    # Need to tighten up strategy to avoid this situations
     def grab_ball(self):
         if self.our_defender.has_ball(self.ball):
             self.current_state = self.ALIGN
@@ -228,13 +221,8 @@ class Milestone2Defender(Strategy):
         displacement, angle = self.our_defender.get_direction_to_point(self.world.their_goal.x, self.world.their_goal.y)
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
-            # time.sleep(1)
-            action = calculate_motor_speed(None, angle, careful=True)
-            if action['left_motor'] == 0 and action['right_motor'] == 0:
-                self.current_state = self.SHOOT
-                return do_nothing()
-            else:
-                return action
+            self.current_state = self.SHOOT
+            return do_nothing()
         else:
             return action
     
@@ -245,7 +233,6 @@ class Milestone2Defender(Strategy):
 
     
     def finish(self):
-        # self.current_state = self.PREPARE
         return do_nothing()
 
 
@@ -261,7 +248,6 @@ class Milestone2Defender(Strategy):
             return self.world.our_goal.x - self.GOAL_ALIGN_OFFSET
 
 
-# LB: THIS, simplified maybe?
 class DefenderPenalty(Strategy):
 
 
@@ -288,7 +274,6 @@ class DefenderPenalty(Strategy):
         Run around, blocking shots.
         """
         # Predict where they are aiming.
-        # LB: We can fiddle this for the penalty defence to know when we are allowed to move
         if self.ball.velocity > BALL_VELOCITY:
             predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.ball, bounce=False)
 
@@ -306,8 +291,7 @@ class DefenderPenalty(Strategy):
             displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x, y)
             return calculate_motor_speed(displacement, angle, backwards_ok=True)
 
-# LB: THIS
-# LB: THIS
+
 class DefenderGrab(Strategy):
 
     DEFEND, GO_TO_BALL, GRAB_BALL, GRABBED = 'DEFEND', 'GO_TO_BALL', 'GRAB_BALL', 'GRABBED'
@@ -358,7 +342,7 @@ class DefenderGrab(Strategy):
             self.our_defender.catcher = 'closed'
             return grab_ball()
 
-# LB: THIS, simplified maybe?
+
 class AttackerScoreDynamic(Strategy):
     """
     Goal scoring tactic. Assumes it will be executed when the robot has grabbed the ball.
@@ -563,7 +547,7 @@ class AttackerScoreDynamic(Strategy):
             return self.world.their_goal.y + self.world.their_goal.width / 2 - int(self.GOAL_CORNER_OFFSET * 1.5)
         return self.world.their_goal.y - self.world.their_goal.width / 2 + self.GOAL_CORNER_OFFSET + 20
 
-# LB: THIS, simplified maybe?
+
 class AttackerTurnScore(Strategy):
     """
     Move up and down the opponent's goal line and suddenly turn 90 degrees and kick if the

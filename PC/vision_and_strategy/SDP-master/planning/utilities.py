@@ -1,14 +1,15 @@
 from math import tan, pi, hypot, log
 from planning.models import Robot
 
-# LB: need to update this to match our motors
-# In particular they run at between ~30 and 100
-# (Below 30 and the motors will not spin)
 DISTANCE_MATCH_THRESHOLD = 15
 ANGLE_MATCH_THRESHOLD = pi/10
 BALL_ANGLE_THRESHOLD = pi/20
-MAX_DISPLACEMENT_SPEED = 690
-MAX_ANGLE_SPEED = 50
+
+FORWARD_SPEED = 80
+FORWARD_SPEED_CAREFUL = 40
+TURNING_SPEED = 60
+TURNING_SPEED_CAREFUL = 37
+
 BALL_VELOCITY = 3
 
 
@@ -99,7 +100,7 @@ def kick_ball():
 def open_catcher():
     return {'kicker': 1}
 
-# LB: Not currently supported
+# LB: Not currently supported by arduino
 def turn_shoot(orientation):
     return {'turn_90': orientation, 'left_motor': 0, 'right_motor': 0, 'kicker': 1, 'catcher': 0, 'speed': 1000}
 
@@ -120,26 +121,29 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
     Simplistic view of calculating the speed: no modes or trying to be careful
     '''
 
+    # LB: potentially calculate careful turning speed based on angle
+    # - Slow down as we get closer
     if careful:
         threshold = BALL_ANGLE_THRESHOLD
     else:
         threshold = ANGLE_MATCH_THRESHOLD
 
     if angle is not None:
-        # Check if we can get there with less turning by going backwards
-        # Multiplier is to set the motors to run backwards
+
+        # Multiplier is negative if the motors are to run backwards
         multiplier = 1
+
+        # Check if we can get there with less turning by going backwards
         if backwards_ok and abs(angle) > pi/2:
             moving_backwards = True
             if angle > 0:
                 angle = (angle - pi)
             else:
-                (angle + pi)
+                angle = (angle + pi)
             multiplier = -1
 
         if abs(angle) > threshold:
             if careful:
-                # LB: potentially calculate careful turning speed based on angle
                 turnSpeed = 37 * multiplier
             else:
                 turnSpeed = 60 * multiplier
@@ -150,10 +154,9 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
                 return {'left_motor': turnSpeed, 'right_motor': -turnSpeed}
         elif displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD:
             if careful:
-                # LB: potentially calculate careful speed based on displacement
-                speed = 40 * multiplier
+                speed = TURNING_SPEED_CAREFUL * multiplier
             else:
-                speed = 80 * multiplier
+                speed = TURNING_SPEED * multiplier
             return {'left_motor': speed, 'right_motor': speed}
             
         else:
@@ -161,91 +164,12 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
         
     elif displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD:
         if careful:
-            # LB: potentially calculate careful speed based on displacement
-            speed = 35
+            speed = FORWARD_SPEED_CAREFUL
         else:
-            speed = 80
+            speed = FORWARD_SPEED
         return {'left_motor': speed, 'right_motor': speed}
     else:
         return {'left_motor': 0, 'right_motor': 0}
-
-def calculate_goal_speed(displacement, angle, careful=False):
-    '''
-    Simplistic view of calculating the speed: no modes or trying to be careful
-    '''
-
-    if careful:
-        threshold = BALL_ANGLE_THRESHOLD
-    else:
-        threshold = ANGLE_MATCH_THRESHOLD
-
-    if angle is not None:
-        # Check if we can get there with less turning by going backwards
-        # Multiplier is to set the motors to run backwards
-        multiplier = 1
-        if abs(angle) > pi/2:
-            moving_backwards = True
-            if angle > 0:
-                angle = (angle - pi)
-            else:
-                (angle + pi)
-            multiplier = -1
-
-        if displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD:
-            if careful:
-                # LB: potentially calculate careful speed based on displacement
-                speed = 35 * multiplier
-            else:
-                speed = 70 * multiplier
-            return {'left_motor': speed, 'right_motor': speed}
-            
-        else:
-            return {'left_motor': 0, 'right_motor': 0}
-        
-    elif displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD:
-        if careful:
-            # LB: potentially calculate careful speed based on displacement
-            speed = 35
-        else:
-            speed = 70
-        return {'left_motor': speed, 'right_motor': speed}
-    else:
-        return {'left_motor': 0, 'right_motor': 0}
-
-    # moving_backwards = False
-    # # LB: Lovely magic numbers
-    # general_speed = 95 if careful else 300
-    # angle_thresh = BALL_ANGLE_THRESHOLD if careful else ANGLE_MATCH_THRESHOLD
-
-    # if backwards_ok and abs(angle) > pi/2:
-    #     angle = (-pi + angle) if angle > 0 else (pi + angle)
-    #     moving_backwards = True
-
-    # if not (displacement is None):
-
-    #     if displacement < DISTANCE_MATCH_THRESHOLD:
-    #         return {'left_motor': 0, 'right_motor': 0, 'speed': general_speed}
-
-    #     elif abs(angle) > angle_thresh:
-    #         speed = (angle/pi) * MAX_ANGLE_SPEED
-    #         return {'left_motor': -speed, 'right_motor': speed, 'speed': general_speed}
-
-    #     else:
-    #         speed = log(displacement, 10) * MAX_DISPLACEMENT_SPEED
-    #         speed = -speed if moving_backwards else speed
-    #         if careful:
-    #             return {'left_motor': speed, 'right_motor': speed, 'speed': 1000/(1+10**(-0.1*(displacement-85)))}
-    #         return {'left_motor': speed, 'right_motor': speed, 'speed': 1000/(1+10**(-0.1*(displacement-30)))}
-
-    # else:
-
-    #     if abs(angle) > angle_thresh:
-    #         speed = (angle/pi) * MAX_ANGLE_SPEED
-    #         return {'left_motor': -speed, 'right_motor': speed, 'speed': general_speed}
-
-    #     else:
-    #         return {'left_motor': 0, 'right_motor': 0, 'speed': general_speed}
-
 
 def do_nothing():
     return {'left_motor': 0, 'right_motor': 0, 'kicker': 0, 'catcher': 0}
