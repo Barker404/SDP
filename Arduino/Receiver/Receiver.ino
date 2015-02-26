@@ -95,7 +95,7 @@ void kick() { //motor 3 not catcher, needs changed
       motorStop(KICKER_MOTOR);
       delay(150);
       motorForward(KICKER_MOTOR, power); //return the kicker to resting position ready for the ball to be caught again
-      delay(200);
+      delay(230);
       motorStop(KICKER_MOTOR);
 
     }
