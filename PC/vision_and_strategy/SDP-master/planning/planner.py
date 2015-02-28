@@ -27,24 +27,28 @@ class Planner:
         self._world.our_defender.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 12} #10
         self._world.our_attacker.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 14}
 
-        # self._defender_defence_strat = DefenderDefence(self._world)
-        # self._defender_attack_strat = DefaultDefenderAttack(self._world)
+        self._attacker_strategies = { 'milestone3catch' : [Milestone3Catch],
+                                      'milestone3kick' : [Milestone3Kick]}
 
-        self._attacker_strategies = { 'milestone2' : [Milestone2Attacker] }
-        # 'defence' : [AttackerDefend],
-        #                              'grab' : [Milestone2Attacker, Milestone2AttackerCareful],
+        self._defender_strategies = { 'milestone3catch' : [Milestone3Catch],
+                                      'milestone3kick' : [Milestone3Kick]}
+        # self._attacker_strategies = {'defence' : [AttackerDefend],
+        #                              'grab' : [AttackerGrab, AttackerGrabCareful],
         #                              'score' : [AttackerDriveByTurn, AttackerDriveBy, AttackerTurnScore, AttackerScoreDynamic],
         #                              'catch' : [AttackerPositionCatch, AttackerCatch]}
 
-        self._defender_strategies = {'milestone2' : [Milestone2Defender] }
-        # , DefenderPenalty],
+        # self._defender_strategies = {'defence' : [DefenderDefence, DefenderPenalty],
         #                              'grab' : [DefenderGrab],
         #                              'pass' : [DefenderBouncePass]}
 
-        self._defender_state = 'milestone2'
+
+
+
+        # LB: Choose a state based on command line input
+        self._defender_state = 'milestone3catch'
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
 
-        self._attacker_state = 'milestone2'
+        self._attacker_state = 'milestone3catch'
         self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
 
     # LB: Only chooses the first possible strategy? Is this correct?
@@ -73,7 +77,7 @@ class Planner:
     @attacker_state.setter
     def attacker_state(self, new_state):
         # LB: assertion looks strange - state is set to things like "grab" at some points - check this
-        assert new_state in ['defence', 'attack', 'milestone2']
+        assert new_state in ['defence', 'attack', 'milestone3catch', 'milestone3kick']
         self._attacker_state = new_state
 
     @property
@@ -83,7 +87,7 @@ class Planner:
     @defender_state.setter
     def defender_state(self, new_state):
         # LB: assertion looks strange - state is set to things like "grab" at some points - check this
-        assert new_state in ['defence', 'attack', 'milestone2']
+        assert new_state in ['defence', 'attack', 'milestone3catch', 'milestone3kick']
         self._defender_state = new_state
 
     def update_world(self, position_dictionary):
@@ -93,23 +97,12 @@ class Planner:
     # I also don't think robot should have a default - to avoid forgetting the parameter
     # But we need to check if it is used anywhere without the parameter
     def plan(self, robot='attacker'):
-        # Test
+
         if robot == 'defender':
-            if not self._defender_state == 'milestone2':
-                self._defender_state = 'milestone2'
-            if not isinstance(self._defender_current_strategy, Milestone2Defender):
-                self._defender_current_strategy = self.choose_defender_strategy(self._world)
             return self._defender_current_strategy.generate()
 
         if robot == 'attacker':
-            if not self._attacker_state == 'milestone2':
-                self._attacker_state = 'milestone2'
-            if not isinstance(self._attacker_current_strategy, Milestone2Attacker):
-                self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
             return self._attacker_current_strategy.generate()
-
-
-
 
 
 
