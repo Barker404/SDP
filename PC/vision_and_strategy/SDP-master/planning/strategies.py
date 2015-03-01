@@ -31,20 +31,45 @@ class Strategy(object):
     def generate(self):
         return self.NEXT_ACTION_MAP[self.current_state]()
 
+
 class Milestone3Catch(Strategy):
+    # For controlling _defender_
+
+    # (Check if enemy defender on pitch?)
+    # (If so, skip to turning to face vertically (face attacker?))
+    # Turn to be facing verically
+    # Stay in line with other robot
+    # When it stops, we open catcher
+    # Then turn to receive
+    # Should be possible to go back to following from here
+    # Grab when the ball is near enough
+    # (If grab fails, try to pick up ball?)
 
     STATES = []
 
     def __init__(self, world):
         super(Milestone3Catch, self).__init__(world, self.STATES)
         self.NEXT_ACTION_MAP = {}
-        
+
     self.our_attacker = self.world.our_attacker
     self.their_attacker = self.world.their_attacker
     self.our_defender = self.world.our_defender
     self.ball = self.world.ball
 
 class Milestone3Kick(Strategy):
+    # For controlling _defender_
+
+    # Check if enemy defender on pitch
+    # If so, find point where we can shoot past
+    # Move to this point
+    # (Maybe move while pass would be blocked? - need to choose direction)
+    # Stop
+    # Turn to face other robot (continuously)
+    # Once it has stopped moving (including turning) pass
+    # (After waiting a short moment?)
+    # (Does current world state include stationary rotation?)
+    # (Might need to store direction locally)
+
 
     STATES = []
 
