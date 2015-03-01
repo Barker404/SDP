@@ -12,6 +12,18 @@ TURNING_SPEED_CAREFUL = 37
 
 BALL_VELOCITY = 3
 
+def in_line(self, robot1, robot2):
+    '''
+    Checks if robot1 and robot2 are horizontally in line
+    '''
+    return abs(robot1.y - robot2.y) < DISTANCE_MATCH_THRESHOLD
+
+def is_facing(self, robot1, robot2):
+    '''
+    Checks if robot1 is facing robot2
+    '''
+    angle = robot1.get_rotation_to_point(robot2.x, robot2.y)
+    return abs(angle) < BALL_ANGLE_THRESHOLD
 
 def is_shot_blocked(world, our_robot, their_robot):
     '''
@@ -144,9 +156,9 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
 
         if abs(angle) > threshold:
             if careful:
-                turnSpeed = 37 * multiplier
+                turnSpeed = TURNING_SPEED_CAREFUL * multiplier
             else:
-                turnSpeed = 60 * multiplier
+                turnSpeed = TURNING_SPEED * multiplier
 
             if angle <= 0:
                 return {'left_motor': -turnSpeed, 'right_motor': turnSpeed}
