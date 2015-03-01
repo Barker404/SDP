@@ -175,21 +175,6 @@ class Robot_Controller(object):
         Execute robot action.
         """
 
-        # LB: arduino control assumptions turned out to be wrong:
-        # 'left_motor' and 'right_motor' are values between 
-        # -(utilities.MAX_DISPLACEMENT_SPEED) and (utilities.MAX_DISPLACEMENT_SPEED)
-        # or between -(utilities.MAX_ANGLE_SPEED) and (utilities.MAX_ANGLE_SPEED)
-        # Team 7 used stepper motors, so these seem to actually represent a number of steps
-        # Roughly, how long to fire the motors for
-        # This might need translating to our system
-        #
-        # speed (sent to arduino twice?) is an extra value (equivalent to max speed/acceleration)
-        # When moving straight forwards, it is some complicated value
-        # otherwise, it is one of two values - (magic numbers) 95 or 300 (depending on "carefullness")
-        #
-        # Best bet might be to ignore the (general) speed 
-        # and simply transform the left/right values to "speeds"
-
         # Do whatever actions are specified in the action dict
         # To kick without affecting wheels, don't send 'left_motor' or 'right_motor' at all
         if action is not None:
