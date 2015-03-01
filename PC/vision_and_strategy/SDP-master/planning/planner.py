@@ -19,7 +19,7 @@ class Planner:
     # This is how far through the strategy they are
     # e.g. when grabing ball, we must -prepare-, -go to the ball-, -grab- it, and be -finished-
 
-    def __init__(self, our_side, pitch_num):
+    def __init__(self, our_side, pitch_num, task):
         self._world = World(our_side, pitch_num)
         # LB: Magic numbers!
         # These should surely be constants in models.py?
@@ -41,14 +41,16 @@ class Planner:
         #                              'grab' : [DefenderGrab],
         #                              'pass' : [DefenderBouncePass]}
 
-
-
-
-        # LB: Choose a state based on command line input
-        self._defender_state = 'milestone3catch'
+        assert task in ['kick', 'catch']
+        self.task = task
+        if task == 'kick':
+            self._defender_state = 'milestone3kick'
+            self._attacker_state = 'milestone3kick'
+        else:
+            self._defender_state = 'milestone3catch'
+            self._attacker_state = 'milestone3catch'
+            
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
-
-        self._attacker_state = 'milestone3catch'
         self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
 
     # LB: Only chooses the first possible strategy? Is this correct?
@@ -97,18 +99,32 @@ class Planner:
     # I also don't think robot should have a default - to avoid forgetting the parameter
     # But we need to check if it is used anywhere without the parameter
     def plan(self, robot='attacker'):
+        assert robot in ['attacker', 'defender']
+        assert self.task in ['kick', 'catch']
+        
+        if self.task == 'kick':
+            state = 'milestone3kick'
+            strategy = Milestone3Kick
+        else:
+            state = 'milestone3catch'
+            strategy = Milestone3Catch
 
         if robot == 'defender':
+            if not self._defender_state == state:
+                self._defender_state = state
+            if not isinstance(self._defender_current_strategy, strategy):
+                self._defender_current_strategy = self.choose_defender_strategy(self._world)
             return self._defender_current_strategy.generate()
 
         if robot == 'attacker':
+            if not self._attacker_state == state:
+                self._attacker_state = state
+            if not isinstance(self._attacker_current_strategy, strategy):
+                self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
             return self._attacker_current_strategy.generate()
 
 
 
-
-
-        assert robot in ['attacker', 'defender']
         our_defender = self._world.our_defender
         our_attacker = self._world.our_attacker
         their_defender = self._world.their_defender

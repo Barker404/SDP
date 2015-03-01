@@ -57,7 +57,7 @@ class Controller:
         self.postprocessing = Postprocessing()
 
         # Set up main planner
-        self.planner = Planner(our_side=our_side, pitch_num=self.pitch)
+        self.planner = Planner(our_side=our_side, pitch_num=self.pitch, task=task)
 
         # Set up GUI
         self.GUI = GUI(calibration=self.calibration, arduino=self.arduino, pitch=self.pitch)
