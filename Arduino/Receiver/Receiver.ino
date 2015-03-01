@@ -56,7 +56,7 @@ void RUN_ENGINE() {
     }
     else if (leftSpeed < 0)
     {
-        motorBackward(5, leftSpeed);
+        motorBackward(5, -leftSpeed);
     }
     else
     {
@@ -69,7 +69,7 @@ void RUN_ENGINE() {
     }
     else if (rightSpeed < 0)
     {
-        motorBackward(3, rightSpeed);
+        motorBackward(3, -rightSpeed);
     }
     else
     {
