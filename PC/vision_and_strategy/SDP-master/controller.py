@@ -18,7 +18,7 @@ class Controller:
     Primary source of robot control. Ties vision and planning together.
     """
 
-    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM0', comms=1, attacking=False):
+    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM0', comms=1, robot, task):
         """
         Entry point for the SDP system.
 
@@ -28,17 +28,16 @@ class Controller:
             [int] pitch                     0 - main pitch, 1 - secondary pitch
             [string] our_side               the side we're on - 'left' or 'right'
             *[int] port                     The camera port to take the feed from
-            *[Robot_Controller] attacker    Robot controller object - Attacker Robot has a RED
-                                            power wire
-            *[Robot_Controller] defender    Robot controller object - Defender Robot has a YELLOW
-                                            power wire
         """
         assert pitch in [0, 1]
         assert color in ['yellow', 'blue']
         assert our_side in ['left', 'right']
+        assert robot in ['attacker', 'defender']
+        assert task in ['catch', 'kick']
 
         self.pitch = pitch
-        self.attacking = attacking
+        self.attacking = (robot == 'attacker')
+        self.task = task
         # Set up the Arduino communications
         self.arduino = Arduino(comm_port, 115200, 1, comms)
 
@@ -271,17 +270,18 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("pitch", help="[0] Main pitch, [1] Secondary pitch")
-    parser.add_argument("side", help="The side of our defender ['left', 'right'] allowed.")
+    parser.add_argument("side", help="The side of our defender - ['left', 'right'] allowed.")
     parser.add_argument("color", help="The color of our team - ['yellow', 'blue'] allowed.")
-    parser.add_argument(
-        "-a", "--attack", help="attack b*tch", action="store_true")
+    parser.add_argument("robot", help="The robot we control (for milestones) - [attacker, defender] allowed")
+    parser.add_argument("task", help="Whether to kick or catch (for milestone 3) - [kick, catch] allowed")
     parser.add_argument(
         "-n", "--nocomms", help="Disables sending commands to the robot.", action="store_true")
 
     args = parser.parse_args()
     if args.nocomms:
-        c = Controller(
-            pitch=int(args.pitch), color=args.color, our_side=args.side, comms=0, attacking=args.attack).wow()
+        comms = 0
     else:
-        c = Controller(
-            pitch=int(args.pitch), color=args.color, our_side=args.side, attacking=args.attack).wow()
+        comms = 1
+
+    c = Controller(
+        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms, robot=args.robot, task=args.task).wow()
