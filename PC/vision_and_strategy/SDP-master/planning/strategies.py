@@ -45,16 +45,22 @@ class Milestone3Catch(Strategy):
     # Grab when the ball is near enough
     # (If grab fails, try to pick up ball?)
 
-    STATES = []
+    TODO = 'TODO'
+    STATES = [TODO]
 
     def __init__(self, world):
         super(Milestone3Catch, self).__init__(world, self.STATES)
-        self.NEXT_ACTION_MAP = {}
+        self.NEXT_ACTION_MAP = {
+            self.TODO: self.todo
+        }
 
-    self.our_attacker = self.world.our_attacker
-    self.their_attacker = self.world.their_attacker
-    self.our_defender = self.world.our_defender
-    self.ball = self.world.ball
+        self.our_attacker = self.world.our_attacker
+        self.their_attacker = self.world.their_attacker
+        self.our_defender = self.world.our_defender
+        self.ball = self.world.ball
+
+    def todo(self):
+        print "running"
 
 class Milestone3Kick(Strategy):
     # For controlling _defender_
@@ -70,18 +76,22 @@ class Milestone3Kick(Strategy):
     # (Does current world state include stationary rotation?)
     # (Might need to store direction locally)
 
-
-    STATES = []
+    TODO = 'TODO'
+    STATES = [TODO]
 
     def __init__(self, world):
         super(Milestone3Kick, self).__init__(world, self.STATES)
-        self.NEXT_ACTION_MAP = {}
+        self.NEXT_ACTION_MAP = {
+            self.TODO: self.todo
+        }
         
-    self.our_attacker = self.world.our_attacker
-    self.their_attacker = self.world.their_attacker
-    self.our_defender = self.world.our_defender
-    self.ball = self.world.ball
+        self.our_attacker = self.world.our_attacker
+        self.their_attacker = self.world.their_attacker
+        self.our_defender = self.world.our_defender
+        self.ball = self.world.ball
 
+    def todo(self):
+        print "running"
 
 
 class Milestone2Attacker(Strategy):
