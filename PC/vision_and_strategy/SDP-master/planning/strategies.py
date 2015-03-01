@@ -31,6 +31,34 @@ class Strategy(object):
     def generate(self):
         return self.NEXT_ACTION_MAP[self.current_state]()
 
+class Milestone3Catch(Strategy):
+
+    STATES = []
+
+    def __init__(self, world):
+        super(Milestone3Catch, self).__init__(world, self.STATES)
+        self.NEXT_ACTION_MAP = {}
+        
+    self.our_attacker = self.world.our_attacker
+    self.their_attacker = self.world.their_attacker
+    self.our_defender = self.world.our_defender
+    self.ball = self.world.ball
+
+class Milestone3Kick(Strategy):
+
+    STATES = []
+
+    def __init__(self, world):
+        super(Milestone3Kick, self).__init__(world, self.STATES)
+        self.NEXT_ACTION_MAP = {}
+        
+    self.our_attacker = self.world.our_attacker
+    self.their_attacker = self.world.their_attacker
+    self.our_defender = self.world.our_defender
+    self.ball = self.world.ball
+
+
+
 class Milestone2Attacker(Strategy):
 
     PREPARE, GO_TO_BALL, GRAB_BALL, ALIGN, SHOOT, FINISH = \
