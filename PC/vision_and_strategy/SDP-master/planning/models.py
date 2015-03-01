@@ -204,6 +204,7 @@ class Robot(PitchObject):
     def catcher_area(self, area_dict):
         self._catcher_area = area_dict
 
+    # LB: This might not be in use - if it is, there might be a better way
     @property
     def catcher_area_plus(self):
         height = self._catcher_area['height'] + CATCHING_DISP_THRESHOLD
