@@ -105,8 +105,8 @@ def grab_ball():
     return {'catcher': 1}
 
 
-def kick_ball():
-    return {'kicker': 1}
+def kick_ball(power):
+    return {'kicker': power}
 
 
 def open_catcher():
@@ -166,9 +166,9 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
                 return {'left_motor': turnSpeed, 'right_motor': -turnSpeed}
         elif displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD:
             if careful:
-                speed = TURNING_SPEED_CAREFUL * multiplier
+                speed = FORWARD_SPEED_CAREFUL * multiplier
             else:
-                speed = TURNING_SPEED * multiplier
+                speed = FORWARD_SPEED * multiplier
             return {'left_motor': speed, 'right_motor': speed}
             
         else:
