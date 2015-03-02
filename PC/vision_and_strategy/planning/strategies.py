@@ -83,8 +83,8 @@ class Milestone3Catch(Strategy):
             # self.current_state = self.PREPARE_CATCH
             return do_nothing()
         else:
-            angle = 0
-            displacement = self.our_defender.y - self.our_defender.x
+            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
+                                                                           self.our_attacker.y)
             return calculate_motor_speed(displacement, angle, careful=True, backwards_ok=True)
 
     def prepare_catch(self):
