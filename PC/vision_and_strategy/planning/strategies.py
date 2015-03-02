@@ -138,9 +138,9 @@ class Milestone3Kick(Strategy):
     # def todo(self):
     #     print "running"
 
-    PREPARE, GET_BALL, GRAB_CHECK, ALIGN, SHOOT, FINISH = \
-        'PREPARE', 'GET_BALL', 'GRAB_CHECK', 'ALIGN', 'SHOOT', 'FINISH'
-    STATES = [PREPARE, GET_BALL, GRAB_CHECK, ALIGN, SHOOT, FINISH]
+    PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, SHOOT, FINISH = \
+        'PREPARE', 'GET_BALL', 'GRAB_CHECK', 'AVOID', 'ALIGN', 'SHOOT', 'FINISH'
+    STATES = [PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, SHOOT, FINISH]
 
     def __init__(self, world):
         super(Milestone3Kick, self).__init__(world, self.STATES)
@@ -149,6 +149,7 @@ class Milestone3Kick(Strategy):
             self.PREPARE: self.prepare,
             self.GET_BALL: self.get_ball,
             self.GRAB_CHECK: self.grab_check,
+            self.AVOID: self.avoid,
             self.ALIGN: self.align,
             self.SHOOT: self.shoot,
             self.FINISH: self.finish
@@ -184,16 +185,21 @@ class Milestone3Kick(Strategy):
             self.our_defender.catcher = 'open'
             return open_catcher()
 
+    def avoid(self):
+        displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
+        if self.our_defender.can_catch_ball(self.ball):
+            self.current_state = self.GRAB_CHECK
+            self.our_defender.catcher = 'closed'
+            return grab_ball()
+        else:
+            return calculate_motor_speed(displacement, angle, careful=True)
+
     def align(self):
         displacement, angle = self.our_defender.get_direction_to_point(self.world.their_goal.x, self.world.their_goal.y)
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
-            action = calculate_motor_speed(None, angle, careful=True)
-            if action['left_motor'] == 0 and action['right_motor'] == 0:
-                self.current_state = self.SHOOT
-                return do_nothing()
-            else:
-                return action
+            self.current_state = self.SHOOT
+            return do_nothing()
         else:
             return action
     
