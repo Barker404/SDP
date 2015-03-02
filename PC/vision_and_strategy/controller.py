@@ -202,6 +202,9 @@ class Robot_Controller(object):
             elif 'catcher' in action and action['catcher'] != 0:
                 try:
                     comm.write('RUN_CATCH\r')
+            elif 'drop' in action and action['drop'] != 0:
+                try:
+                    comm.write('DROP\r')
                 except StandardError:
                     pass
 

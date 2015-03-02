@@ -110,7 +110,7 @@ def kick_ball():
 
 
 def open_catcher():
-    return {'kicker': 1}
+    return {'drop': 1}
 
 # LB: Not currently supported by arduino
 def turn_shoot(orientation):
