@@ -98,7 +98,7 @@ class Milestone3Catch(Strategy):
         else:
             self.current_state = self.ALIGN_DOWN
             self.our_attacker.catcher = 'closed'
-            return kick_ball()
+            return grab_ball()
 
 
 class Milestone3Kick(Strategy):
