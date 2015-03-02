@@ -121,23 +121,88 @@ class Milestone3Kick(Strategy):
     # (Does current world state include stationary rotation?)
     # (Might need to store direction locally)
 
-    TODO = 'TODO'
-    STATES = [TODO]
+    # TODO = 'TODO'
+    # STATES = [TODO]
+
+    # def __init__(self, world):
+    #     super(Milestone3Kick, self).__init__(world, self.STATES)
+    #     self.NEXT_ACTION_MAP = {
+    #         self.TODO: self.todo
+    #     }
+        
+    #     self.our_attacker = self.world.our_attacker
+    #     self.their_attacker = self.world.their_attacker
+    #     self.our_defender = self.world.our_defender
+    #     self.ball = self.world.ball
+
+    # def todo(self):
+    #     print "running"
+
+    PREPARE, GO_TO_BALL, GRAB_BALL, ALIGN, SHOOT, FINISH = \
+        'PREPARE', 'GO_TO_BALL', 'GRAB_BALL', 'ALIGN', 'SHOOT', 'FINISH'
+    STATES = [PREPARE, GO_TO_BALL, GRAB_BALL, ALIGN, SHOOT, FINISH]
 
     def __init__(self, world):
         super(Milestone3Kick, self).__init__(world, self.STATES)
+
         self.NEXT_ACTION_MAP = {
-            self.TODO: self.todo
+            self.PREPARE: self.prepare,
+            self.GO_TO_BALL: self.position,
+            self.GRAB_BALL: self.grab,
+            self.ALIGN: self.align,
+            self.SHOOT: self.shoot,
+            self.FINISH: self.finish
         }
-        
+
         self.our_attacker = self.world.our_attacker
-        self.their_attacker = self.world.their_attacker
         self.our_defender = self.world.our_defender
         self.ball = self.world.ball
 
-    def todo(self):
-        print "running"
+    def prepare(self):
+        self.current_state = self.GO_TO_BALL
+        if self.our_defender.catcher == 'closed':
+            self.our_defender.catcher = 'open'
+            return open_catcher()
+        else:
+            return do_nothing()
 
+    def position(self):
+        displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
+        if self.our_defender.can_catch_ball(self.ball):
+            # self.current_state = self.GRAB_BALL
+            return {}
+        else:
+            return calculate_motor_speed(None, angle, careful=True)
+
+    def grab(self):
+        if self.our_defender.has_ball(self.ball):
+            self.current_state = self.ALIGN
+            return do_nothing()
+        else:
+            self.our_defender.catcher = 'closed'
+            return grab_ball()
+
+    def align(self):
+        displacement, angle = self.our_defender.get_direction_to_point(self.world.their_goal.x, self.world.their_goal.y)
+        action = calculate_motor_speed(None, angle, careful=True)
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
+            action = calculate_motor_speed(None, angle, careful=True)
+            if action['left_motor'] == 0 and action['right_motor'] == 0:
+                self.current_state = self.SHOOT
+                return do_nothing()
+            else:
+                return action
+        else:
+            return action
+    
+    def shoot(self):
+        self.our_defender.catcher = 'open'
+        self.current_state = self.FINISH
+        return kick_ball(DEFAULT_KICK_POWER)
+
+    
+    def finish(self):
+        return do_nothing()
 
 class Milestone2Attacker(Strategy):
 
