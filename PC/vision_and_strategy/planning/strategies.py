@@ -3,6 +3,8 @@ import math
 from random import randint
 import time
 
+DEFAULT_KICK_POWER = 80
+
 class Strategy(object):
 
     PRECISE_BALL_ANGLE_THRESHOLD = math.pi / 15.0
@@ -80,7 +82,7 @@ class Milestone3Catch(Strategy):
 
     def follow(self):
         if in_line(self.our_defender, self.our_attacker):
-            # self.current_state = self.PREPARE_CATCH
+            self.current_state = self.PREPARE_CATCH
             return do_nothing()
         else:
             displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
@@ -97,7 +99,7 @@ class Milestone3Catch(Strategy):
         if in_line(self.our_defender, self.our_attacker):
             angle = self.our_defender.get_rotation_to_point(self.our_attacker.x,
                                                             self.our_attacker.y)
-            action = calculate_motor_speed(None, angle)
+            action = calculate_motor_speed(None, angle, careful=True, backwards_ok=True)
             return action
         else:
             self.current_state = self.ALIGN_DOWN
@@ -198,7 +200,7 @@ class Milestone2Attacker(Strategy):
     def shoot(self):
         self.our_attacker.catcher = 'open'
         self.current_state = self.FINISH
-        return kick_ball()
+        return kick_ball(DEFAULT_KICK_POWER)
 
     
     def finish(self):
@@ -335,7 +337,7 @@ class Milestone2Defender(Strategy):
     def shoot(self):
         self.our_defender.catcher = 'open'
         self.current_state = self.FINISH
-        return kick_ball()
+        return kick_ball(DEFAULT_KICK_POWER)
 
     
     def finish(self):
@@ -606,7 +608,7 @@ class AttackerScoreDynamic(Strategy):
         Kick.
         """
         self.current_state = self.SHOOT
-        return kick_ball()
+        return kick_ball(DEFAULT_KICK_POWER)
 
     def _get_shooting_coordinates(self, robot):
         """

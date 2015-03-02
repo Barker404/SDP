@@ -194,8 +194,8 @@ class Robot_Controller(object):
 
             if 'kicker' in action and action['kicker'] != 0:
                 try:
-                    comm.write('RUN_KICK 80\r')
-                    comm.write('RUN_KICK 80\r')
+                    comm.write('RUN_KICK %d\r' % (action['kicker']))
+                    comm.write('RUN_KICK %d\r' % (action['kicker']))
                     # Let the kick finish before we tell it what else to do
                 except StandardError:
                     pass
