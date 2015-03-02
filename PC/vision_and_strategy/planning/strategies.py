@@ -169,10 +169,10 @@ class Milestone3Kick(Strategy):
     def position(self):
         displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
         if self.our_defender.can_catch_ball(self.ball):
-            # self.current_state = self.GRAB_BALL
-            return {}
+            self.current_state = self.GRAB_BALL
+            return do_nothing()
         else:
-            return calculate_motor_speed(None, angle, careful=True)
+            return calculate_motor_speed(displacement, angle, careful=True)
 
     def grab(self):
         if self.our_defender.has_ball(self.ball):
