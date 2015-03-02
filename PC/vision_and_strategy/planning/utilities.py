@@ -132,7 +132,7 @@ def has_matched(robot, x=None, y=None, angle=None,
 
 def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False):
     '''
-    Simplistic view of calculating the speed: no modes or trying to be careful
+    Simplistic view of calculating the speed
     '''
 
     # LB: potentially calculate careful turning speed based on angle
