@@ -64,11 +64,24 @@ class Milestone3Catch(Strategy):
 
 
     def align_down(self):
+        # This could just check our_defender.angle
         angle = self.our_defender.get_rotation_to_point(self.our_defender.x, 0)
-        return calculate_motor_speed(None, angle, careful=True)
+        action = calculate_motor_speed(None, angle, careful=True)
+        if action['left_motor'] = 0 and action['right_motor'] = 0:
+            self.current_state = self.FOLLOW
+            return do_nothing()
+        else
+            return action
 
     def follow(self):
-        pass
+        if in_line(self.our_defender, self.our_attacker):
+            # self.current_state = self.ALIGN_PASS
+            return do_nothing
+        else:
+            angle = 0
+            displacement = self.our_defender.y - self.our_defender.x
+            return calculate_motor_speed(displacement, angle, careful=True, backwards_ok=True)
+
 
     def align_pass(self):
         pass
