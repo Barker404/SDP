@@ -68,10 +68,10 @@ class Milestone3Catch(Strategy):
         # This could just check our_defender.angle
         angle = self.our_defender.get_rotation_to_point(self.our_defender.x, 0)
         action = calculate_motor_speed(None, angle, careful=True)
-        if action['left_motor'] = 0 and action['right_motor'] = 0:
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
             self.current_state = self.FOLLOW
             return do_nothing()
-        else
+        else:
             return action
 
     def follow(self):
