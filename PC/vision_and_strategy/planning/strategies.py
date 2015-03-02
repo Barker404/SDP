@@ -85,6 +85,7 @@ class Milestone3Catch(Strategy):
 
     def prepare_catch():
         self.current_state = self.ALIGN_PASS
+        self.our_attacker.catcher = 'open'
         return open_catcher()
 
     def align_pass(self):
@@ -96,6 +97,7 @@ class Milestone3Catch(Strategy):
             return action
         else:
             self.current_state = self.ALIGN_DOWN
+            self.our_attacker.catcher = 'closed'
             return kick_ball()
 
 
