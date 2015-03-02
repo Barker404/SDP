@@ -45,17 +45,17 @@ class Milestone3Catch(Strategy):
     # Grab when the ball is near enough
     # (If grab fails, try to pick up ball?)
 
-    ALIGN_DOWN, FOLLOW, PREPARE_CATCH, ALIGN_PASS, WAIT = 'ALIGN_DOWN', 'FOLLOW', 'PREPARE_CATCH', 'ALIGN_PASS', 'WAIT'
-    STATES = [ALIGN_DOWN, FOLLOW, PREPARE_CATCH, ALIGN_PASS, WAIT]
+    PREPARE, ALIGN_DOWN, FOLLOW, PREPARE_CATCH, ALIGN_PASS, WAIT = 'PREPARE', 'ALIGN_DOWN', 'FOLLOW', 'PREPARE_CATCH', 'ALIGN_PASS', 'WAIT'
+    STATES = [PREPARE, ALIGN_DOWN, FOLLOW, PREPARE_CATCH, ALIGN_PASS, WAIT]
 
     def __init__(self, world):
         super(Milestone3Catch, self).__init__(world, self.STATES)
         self.NEXT_ACTION_MAP = {
+            self.PREPARE: self.prepare,
             self.ALIGN_DOWN: self.align_down,
             self.FOLLOW: self.follow,
             self.PREPARE_CATCH: self.prepare_catch,
-            self.ALIGN_PASS: self.align_pass,
-            self.WAIT: self.wait
+            self.ALIGN_PASS: self.align_pass
         }
 
         self.our_attacker = self.world.our_attacker
@@ -63,6 +63,10 @@ class Milestone3Catch(Strategy):
         self.our_defender = self.world.our_defender
         self.ball = self.world.ball
 
+
+    def prepare(self):
+        self.current_state = self.ALIGN_DOWN
+        return do_nothing()
 
     def align_down(self):
         # This could just check our_defender.angle
@@ -77,13 +81,13 @@ class Milestone3Catch(Strategy):
     def follow(self):
         if in_line(self.our_defender, self.our_attacker):
             # self.current_state = self.PREPARE_CATCH
-            return do_nothing
+            return do_nothing()
         else:
             angle = 0
             displacement = self.our_defender.y - self.our_defender.x
             return calculate_motor_speed(displacement, angle, careful=True, backwards_ok=True)
 
-    def prepare_catch():
+    def prepare_catch(self):
         self.current_state = self.ALIGN_PASS
         self.our_attacker.catcher = 'open'
         return open_catcher()

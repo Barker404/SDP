@@ -12,13 +12,13 @@ TURNING_SPEED_CAREFUL = 37
 
 BALL_VELOCITY = 3
 
-def in_line(self, robot1, robot2):
+def in_line(robot1, robot2):
     '''
     Checks if robot1 and robot2 are horizontally in line
     '''
     return abs(robot1.y - robot2.y) < DISTANCE_MATCH_THRESHOLD
 
-def is_facing(self, robot1, robot2):
+def is_facing(robot1, robot2):
     '''
     Checks if robot1 is facing robot2
     '''
