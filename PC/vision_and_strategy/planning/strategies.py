@@ -138,9 +138,9 @@ class Milestone3Kick(Strategy):
     # def todo(self):
     #     print "running"
 
-    PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, SHOOT, FINISH = \
-        'PREPARE', 'GET_BALL', 'GRAB_CHECK', 'AVOID', 'ALIGN', 'SHOOT', 'FINISH'
-    STATES = [PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, SHOOT, FINISH]
+    PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, WAIT, SHOOT, FINISH = \
+        'PREPARE', 'GET_BALL', 'GRAB_CHECK', 'AVOID', 'ALIGN', 'WAIT', 'SHOOT', 'FINISH'
+    STATES = [PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, WAIT, SHOOT, FINISH]
 
     def __init__(self, world):
         super(Milestone3Kick, self).__init__(world, self.STATES)
@@ -151,12 +151,15 @@ class Milestone3Kick(Strategy):
             self.GRAB_CHECK: self.grab_check,
             self.AVOID: self.avoid,
             self.ALIGN: self.align,
+            self.WAIT: self.wait,
             self.SHOOT: self.shoot,
             self.FINISH: self.finish
         }
 
+        self.firstTime = True
         self.our_attacker = self.world.our_attacker
         self.our_defender = self.world.our_defender
+        self.their_attacker = self.world.their_attacker
         self.ball = self.world.ball
 
     def prepare(self):
@@ -186,48 +189,65 @@ class Milestone3Kick(Strategy):
             return open_catcher()
 
     def avoid(self):
-
-        if(self.world._our_side == 'right'):
-            # left top
-            pointX = 448
-            pointY = 77
-
-            # left bottom
-            pointX = 448
-            pointY = 200
-
+        midpont = self.world.pitch.height/2
+        if self.their_attacker.y < midpont:
+            blocked_side = 'bottom'
         else:
-            # left top
-            pointX = 70
-            pointY = 77
+            blocked_side = 'top'
 
-            # left bottom
-            pointX = 70
-            pointY = 200
-
-
-        displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
-        if self.our_defender.can_start_turning(pointX, pointY):
+        if abs(self.their_attacker.y - self.our_defender.y) > 80:
+            # Safe To Shoot
             self.current_state = self.ALIGN
             return do_nothing()
         else:
+
+            if self.world._our_side == 'right':
+                if blocked_side == 'bottom':
+                    # right top
+                    pointX = 448
+                    pointY = self.world.pitch.height
+                else:
+                    # right bottom
+                    pointX = 448
+                    pointY = 0
+            else:
+                if blocked_side == 'bottom':
+                    # left top
+                    pointX = 70
+                    pointY = self.world.pitch.height
+                else:
+                    # left bottom
+                    pointX = 70
+                    pointY = 0
+
+            displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
             return calculate_motor_speed(displacement, angle, careful=True)
+
 
     def align(self):
         # shoot 
+
+        # shoot horizontally
+        angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
         
-        #shoot horizontally
-        displacement, angle = self.our_defender.get_direction_to_point(self.world.our_attacker.x, self.world.our_defender.y)
-        
-        #uncomment to shoot directly to our attacker
-        # displacement, angle = self.our_defender.get_direction_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
+        # uncomment to shoot directly to our attacker
+        # angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
-            self.current_state = self.SHOOT
+            self.current_state = self.WAIT
             return do_nothing()
         else:
             return action
     
+    def wait(self):
+        # Should wait for partner to be in place really
+        if self.firstTime:
+            self.startWait = time.clock()
+            self.firstTime = False
+        if (time.clock() - self.startWait) > 3:
+            self.current_state = self.SHOOT
+            return do_nothing()
+
     def shoot(self):
         self.our_defender.catcher = 'open'
         self.current_state = self.FINISH
@@ -235,7 +255,6 @@ class Milestone3Kick(Strategy):
 
     
     def finish(self):
-
         # self.current_state = self.PREPARE
         return do_nothing()
 

@@ -5,7 +5,7 @@ DISTANCE_MATCH_THRESHOLD = 15
 ANGLE_MATCH_THRESHOLD = pi/10
 BALL_ANGLE_THRESHOLD = pi/15
 CURVE_THRESHOLD = pi/5
-CURVE_SPEED_DIFF = 15
+CURVE_SPEED_DIFF = 10
 
 FORWARD_SPEED = 80
 FORWARD_SPEED_CAREFUL = 40
@@ -155,8 +155,17 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
             else:
                 angle = (angle + pi)
             multiplier = -1
-
-        if abs(angle) > CURVE_THRESHOLD:
+        
+        if (careful and abs(angle) < CURVE_THRESHOLD and abs(angle) > threshold and 
+                displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD):
+            # Move forward curving
+            turnSpeedHigh = min(100, TURNING_SPEED_CAREFUL + CURVE_SPEED_DIFF)
+            turnSpeedLow = max(0, TURNING_SPEED_CAREFUL - CURVE_SPEED_DIFF)           
+            if angle <= 0:
+                return {'left_motor': turnSpeedLow, 'right_motor': turnSpeedHigh}
+            else:
+                return {'left_motor': turnSpeedHigh, 'right_motor': turnSpeedLow}
+        elif abs(angle) > threshold:
             if careful:
                 turnSpeed = TURNING_SPEED_CAREFUL * multiplier
             else:
@@ -166,15 +175,6 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
                 return {'left_motor': -turnSpeed, 'right_motor': turnSpeed}
             else:
                 return {'left_motor': turnSpeed, 'right_motor': -turnSpeed}
-
-        elif careful and abs(angle) > threshold:
-            turnSpeedHigh = min(100, TURNING_SPEED_CAREFUL + CURVE_SPEED_DIFF)
-            turnSpeedLow = max(0, TURNING_SPEED_CAREFUL - CURVE_SPEED_DIFF)           
-            if angle <= 0:
-                return {'left_motor': turnSpeedLow, 'right_motor': turnSpeedHigh}
-            else:
-                return {'left_motor': turnSpeedHigh, 'right_motor': turnSpeedLow}
-        
         elif displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD:
             if careful:
                 speed = FORWARD_SPEED_CAREFUL * multiplier
