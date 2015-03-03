@@ -232,6 +232,14 @@ class Robot(PitchObject):
         '''
         return self.catcher_area_plus.isInside(ball.x, ball.y)
 
+
+    def can_start_turning(self, x, y):
+        '''
+        Milestone 3 hack
+        '''
+        return self.catcher_area_plus.isInside(x, y)
+
+
     def has_ball(self, ball):
         '''
         Gets if the robot has possession of the ball

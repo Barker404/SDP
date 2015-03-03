@@ -178,7 +178,7 @@ class Milestone3Kick(Strategy):
 
     def grab_check(self):
         if self.our_defender.has_ball(self.ball):
-            self.current_state = self.ALIGN
+            self.current_state = self.AVOID
             return do_nothing()
         else:
             self.current_state = self.GET_BALL
@@ -186,16 +186,41 @@ class Milestone3Kick(Strategy):
             return open_catcher()
 
     def avoid(self):
-        displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
-        if self.our_defender.can_catch_ball(self.ball):
-            self.current_state = self.GRAB_CHECK
-            self.our_defender.catcher = 'closed'
-            return grab_ball()
+
+        if(self.world._our_side == 'right'):
+            # left top
+            pointX = 448
+            pointY = 77
+
+            # left bottom
+            pointX = 448
+            pointY = 200
+
+        else:
+            # left top
+            pointX = 70
+            pointY = 77
+
+            # left bottom
+            pointX = 70
+            pointY = 200
+
+
+        displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
+        if self.our_defender.can_start_turning(pointX, pointY):
+            self.current_state = self.ALIGN
+            return do_nothing()
         else:
             return calculate_motor_speed(displacement, angle, careful=True)
 
     def align(self):
-        displacement, angle = self.our_defender.get_direction_to_point(self.world.their_goal.x, self.world.their_goal.y)
+        # shoot 
+        
+        #shoot horizontally
+        displacement, angle = self.our_defender.get_direction_to_point(self.world.our_attacker.x, self.world.our_defender.y)
+        
+        #uncomment to shoot directly to our attacker
+        # displacement, angle = self.our_defender.get_direction_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
             self.current_state = self.SHOOT
@@ -210,6 +235,8 @@ class Milestone3Kick(Strategy):
 
     
     def finish(self):
+
+        # self.current_state = self.PREPARE
         return do_nothing()
 
 class Milestone2Attacker(Strategy):
@@ -414,6 +441,7 @@ class Milestone2Defender(Strategy):
 
     
     def finish(self):
+        self.current_state = self.PREPARE
         return do_nothing()
 
 
