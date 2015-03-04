@@ -234,7 +234,7 @@ class Milestone3Kick(Strategy):
             self.current_state = self.FINISH
             self.our_defender.catcher = 'open'
             return kick_ball()
-        elif partner_in_place:
+        elif in_line(self.our_defender, self.our_attacker) and is_facing(self.our_attacker, self.our_defender):
             # Pause for a bit just in case
             if self.pass_pause_start_time == -1:
                 self.pass_pause_start_time = time.clock()
@@ -289,7 +289,7 @@ class Milestone2Attacker(Strategy):
         displacement, angle = self.our_attacker.get_direction_to_point(self.ball.x, self.ball.y)
         if self.our_attacker.can_catch_ball(self.ball):
             self.current_state = self.GRAB_BALL
-            return {}
+            return do_nothing()
         else:
             return calculate_motor_speed(displacement, angle, careful=True)
 
