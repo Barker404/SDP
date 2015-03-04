@@ -2,7 +2,7 @@ from math import tan, pi, hypot, log
 from planning.models import Robot
 
 DISTANCE_MATCH_THRESHOLD = 15
-ANGLE_MATCH_THRESHOLD = pi/10
+ANGLE_MATCH_THRESHOLD = pi/8
 BALL_ANGLE_THRESHOLD = pi/15
 CURVE_THRESHOLD = pi/5
 CURVE_SPEED_DIFF = 10
@@ -10,15 +10,19 @@ CURVE_SPEED_DIFF = 10
 FORWARD_SPEED = 80
 FORWARD_SPEED_CAREFUL = 40
 TURNING_SPEED = 60
-TURNING_SPEED_CAREFUL = 37
+TURNING_SPEED_CAREFUL = 40
 
 BALL_VELOCITY = 3
 
-def in_line(robot1, robot2):
+def in_line(robot1, robot2, careful=False):
     '''
     Checks if robot1 and robot2 are horizontally in line
     '''
-    return abs(robot1.y - robot2.y) < DISTANCE_MATCH_THRESHOLD
+    if careful:
+        threshold = DISTANCE_MATCH_THRESHOLD
+    else:
+        threshold = DISTANCE_MATCH_THRESHOLD + 10
+    return abs(robot1.y - robot2.y) < threshold
 
 def is_facing(robot1, robot2, careful=False):
     '''

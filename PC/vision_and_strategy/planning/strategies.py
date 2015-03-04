@@ -94,7 +94,7 @@ class Milestone3Catch(Strategy):
             return action
 
     def follow(self):
-        if in_line(self.our_defender, self.our_attacker):
+        if in_line(self.our_defender, self.our_attacker, careful=True):
             self.current_state = self.ALIGN_PASS
             return do_nothing()
         else:
@@ -110,7 +110,7 @@ class Milestone3Catch(Strategy):
             self.our_defender.catcher = 'closed'
             return grab_ball()
 
-        if in_line(self.our_defender, self.our_attacker):
+        if in_line(self.our_defender, self.our_attacker, careful=True):
             angle = self.our_defender.get_rotation_to_point(self.our_attacker.x,
                                                             self.our_attacker.y)
             action = calculate_motor_speed(None, angle, careful=True, backwards_ok=True)
@@ -265,13 +265,13 @@ class Milestone3Kick(Strategy):
         # Record initial time
         if self.lineup_wait_start_time == -1:
             self.lineup_wait_start_time = time.clock()
-        
+
         # Shoot anyway after timeout
         if time.clock() - self.lineup_wait_start_time > self.LINEUP_TIMEOUT:
             self.current_state = self.FINISH
             self.our_defender.catcher = 'open'
             return kick_ball(DEFAULT_KICK_POWER)
-        elif in_line(self.our_defender, self.our_attacker) and is_facing(self.our_attacker, self.our_defender, careful=True):
+        elif in_line(self.our_defender, self.our_attacker) and is_facing(self.our_attacker, self.our_defender):
             # Pause for a bit just in case
             if self.pass_pause_start_time == -1:
                 self.pass_pause_start_time = time.clock()

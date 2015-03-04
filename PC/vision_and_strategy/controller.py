@@ -252,7 +252,7 @@ class Arduino:
     def write(self, string):
         if self.comms == 1:
             self.increment_command+=1;
-            if self.last_command != string or self.increment_command > 20:
+            if self.last_command != string or self.increment_command > 5:
                 self.increment_command=0;
                 print string
                 self.last_command = string
