@@ -38,7 +38,7 @@
             	
             });
 
-//document.onkeydown = checkKey;
+document.onkeydown = checkKey;
 
 function checkKey(e) {
 
@@ -48,43 +48,43 @@ function checkKey(e) {
     if (e.keyCode == '38') {
     	e.preventDefault();
         // up arrow
-        socket.emit('arduino', {data: "FWD"});
+        socket.emit('arduino', {data: "RUN_ENG 99 99"});
         console.log('FWD');
     }
     else if (e.keyCode == '40') {
     	e.preventDefault();
         // down arrow
-        socket.emit('arduino', {data: "BWD"});
+        socket.emit('arduino', {data: "RUN_ENG -99 -99"});
         console.log('BWD');
     }
     else if (e.keyCode == '37') {
     	e.preventDefault();
        // left arrow
-       socket.emit('arduino', {data: "TLEFT"});
+       socket.emit('arduino', {data: "RUN_ENG 99 -99"});
        console.log('LEFT');
     }
     else if (e.keyCode == '39') {
     	e.preventDefault();
        // right arrow
-       socket.emit('arduino', {data: "TRIGHT"});
+       socket.emit('arduino', {data: "RUN_ENG -99 99"});
        console.log('RIGHT');
     }
     else if (e.keyCode == '32') {
     	e.preventDefault();
        // right arrow
-       socket.emit('arduino', {data: "STOP"});
+       socket.emit('arduino', {data: "RUN_ENG 0 0"});
        console.log('STOP');
     }
     else if (e.keyCode == '96') {
     	e.preventDefault();
        // right arrow
-       socket.emit('arduino', {data: "KICK"});
+       socket.emit('arduino', {data: "RUN_KICK 80"});
        console.log('KICK');
     }
     else if (e.keyCode == '97') {
     	e.preventDefault();
        // right arrow
-       socket.emit('arduino', {data: "KICKDOWN"});
+       socket.emit('arduino', {data: "RUN_CATCH"});
        console.log('KICK');
     }
 }

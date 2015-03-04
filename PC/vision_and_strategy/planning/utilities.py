@@ -3,7 +3,9 @@ from planning.models import Robot
 
 DISTANCE_MATCH_THRESHOLD = 15
 ANGLE_MATCH_THRESHOLD = pi/10
-BALL_ANGLE_THRESHOLD = pi/20
+BALL_ANGLE_THRESHOLD = pi/15
+CURVE_THRESHOLD = pi/5
+CURVE_SPEED_DIFF = 10
 
 FORWARD_SPEED = 80
 FORWARD_SPEED_CAREFUL = 40
@@ -12,13 +14,13 @@ TURNING_SPEED_CAREFUL = 37
 
 BALL_VELOCITY = 3
 
-def in_line(self, robot1, robot2):
+def in_line(robot1, robot2):
     '''
     Checks if robot1 and robot2 are horizontally in line
     '''
     return abs(robot1.y - robot2.y) < DISTANCE_MATCH_THRESHOLD
 
-def is_facing(self, robot1, robot2):
+def is_facing(robot1, robot2):
     '''
     Checks if robot1 is facing robot2
     '''
@@ -105,8 +107,8 @@ def grab_ball():
     return {'catcher': 1}
 
 
-def kick_ball():
-    return {'kicker': 1}
+def kick_ball(power):
+    return {'kicker': power}
 
 
 def open_catcher():
@@ -130,7 +132,7 @@ def has_matched(robot, x=None, y=None, angle=None,
 
 def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False):
     '''
-    Simplistic view of calculating the speed: no modes or trying to be careful
+    Simplistic view of calculating the speed
     '''
 
     # LB: potentially calculate careful turning speed based on angle
@@ -153,8 +155,17 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
             else:
                 angle = (angle + pi)
             multiplier = -1
-
-        if abs(angle) > threshold:
+        
+        if (careful and abs(angle) < CURVE_THRESHOLD and abs(angle) > threshold and 
+                displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD):
+            # Move forward curving
+            turnSpeedHigh = min(100, TURNING_SPEED_CAREFUL + CURVE_SPEED_DIFF)
+            turnSpeedLow = max(0, TURNING_SPEED_CAREFUL - CURVE_SPEED_DIFF)           
+            if angle <= 0:
+                return {'left_motor': turnSpeedLow, 'right_motor': turnSpeedHigh}
+            else:
+                return {'left_motor': turnSpeedHigh, 'right_motor': turnSpeedLow}
+        elif abs(angle) > threshold:
             if careful:
                 turnSpeed = TURNING_SPEED_CAREFUL * multiplier
             else:
@@ -166,9 +177,9 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
                 return {'left_motor': turnSpeed, 'right_motor': -turnSpeed}
         elif displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD:
             if careful:
-                speed = TURNING_SPEED_CAREFUL * multiplier
+                speed = FORWARD_SPEED_CAREFUL * multiplier
             else:
-                speed = TURNING_SPEED * multiplier
+                speed = FORWARD_SPEED * multiplier
             return {'left_motor': speed, 'right_motor': speed}
             
         else:
