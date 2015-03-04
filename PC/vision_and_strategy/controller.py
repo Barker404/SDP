@@ -217,7 +217,7 @@ class Robot_Controller(object):
     def shutdown(self, comm):
         comm.write('RUN_ENG %d %d\r' % (0, 0))
         time.sleep(1)
-        comm.write('RUN_KICK 50\r')
+        # comm.write('RUN_KICK 50\r')
 
 
 class Arduino:
