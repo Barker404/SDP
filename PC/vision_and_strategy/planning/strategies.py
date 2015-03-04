@@ -224,17 +224,16 @@ class Milestone3Kick(Strategy):
     
     def wait(self):
         # Record initial time
-        if .selflineup_wait_start_time == -1:
+        if self.lineup_wait_start_time == -1:
             self.lineup_wait_start_time = time.clock()
         
+        # TODO
+        partner_in_place = True
         # Shoot anyway after timeout
         if time.clock - self.lineup_wait_start_time > self.LINEUP_TIMEOUT:
             self.current_state = self.FINISH
             self.our_defender.catcher = 'open'
             return kick_ball()
-
-        # TODO
-        partner_in_place = True
         elif partner_in_place:
             # Pause for a bit just in case
             if self.pass_pause_start_time == -1:
