@@ -20,12 +20,16 @@ def in_line(robot1, robot2):
     '''
     return abs(robot1.y - robot2.y) < DISTANCE_MATCH_THRESHOLD
 
-def is_facing(robot1, robot2):
+def is_facing(robot1, robot2, careful=False):
     '''
     Checks if robot1 is facing robot2
     '''
+    if careful:
+        threshold = BALL_ANGLE_THRESHOLD
+    else:
+        threshold = ANGLE_MATCH_THRESHOLD
     angle = robot1.get_rotation_to_point(robot2.x, robot2.y)
-    return abs(angle) < BALL_ANGLE_THRESHOLD
+    return abs(angle) < threshold
 
 def is_shot_blocked(world, our_robot, their_robot):
     '''
