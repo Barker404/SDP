@@ -118,22 +118,6 @@ class Milestone3Kick(Strategy):
     # (Does current world state include stationary rotation?)
     # (Might need to store direction locally)
 
-    # TODO = 'TODO'
-    # STATES = [TODO]
-
-    # def __init__(self, world):
-    #     super(Milestone3Kick, self).__init__(world, self.STATES)
-    #     self.NEXT_ACTION_MAP = {
-    #         self.TODO: self.todo
-    #     }
-        
-    #     self.our_attacker = self.world.our_attacker
-    #     self.their_attacker = self.world.their_attacker
-    #     self.our_defender = self.world.our_defender
-    #     self.ball = self.world.ball
-
-    # def todo(self):
-    #     print "running"
 
     PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, WAIT, SHOOT, FINISH = \
         'PREPARE', 'GET_BALL', 'GRAB_CHECK', 'AVOID', 'ALIGN', 'WAIT', 'SHOOT', 'FINISH'
@@ -153,7 +137,10 @@ class Milestone3Kick(Strategy):
             self.FINISH: self.finish
         }
 
-        self.firstTime = True
+        self.lineup_wait_start_time = -1
+        self.LINEUP_TIMEOUT = 10
+        self.pass_pause_start_time = -1
+        self.PASS_PAUSE = 1
         self.our_attacker = self.world.our_attacker
         self.our_defender = self.world.our_defender
         self.their_attacker = self.world.their_attacker
@@ -186,6 +173,7 @@ class Milestone3Kick(Strategy):
             return open_catcher()
 
     def avoid(self):
+        print self.our_defender.has_ball(self.ball)
         midpont = self.world.pitch.height/2
         if self.their_attacker.y < midpont:
             blocked_side = 'bottom'
@@ -193,11 +181,10 @@ class Milestone3Kick(Strategy):
             blocked_side = 'top'
 
         if abs(self.their_attacker.y - self.our_defender.y) > 80:
-            # Safe To Shoot
+            # Safe to shoot
             self.current_state = self.ALIGN
             return do_nothing()
         else:
-
             if self.world._our_side == 'right':
                 if blocked_side == 'bottom':
                     # right top
@@ -222,13 +209,12 @@ class Milestone3Kick(Strategy):
 
 
     def align(self):
-        # shoot 
-
-        # shoot horizontally
+        # aim horizontally
         angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
         
-        # uncomment to shoot directly to our attacker
+        # aim directly to our attacker
         # angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
+        
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
             self.current_state = self.WAIT
@@ -237,22 +223,38 @@ class Milestone3Kick(Strategy):
             return action
     
     def wait(self):
-        # Should wait for partner to be in place really
-        if self.firstTime:
-            self.startWait = time.clock()
-            self.firstTime = False
-        if (time.clock() - self.startWait) > 3:
-            self.current_state = self.SHOOT
-            return do_nothing()
+        # Record initial time
+        if .selflineup_wait_start_time == -1:
+            self.lineup_wait_start_time = time.clock()
+        
+        # Shoot anyway after timeout
+        if time.clock - self.lineup_wait_start_time > self.LINEUP_TIMEOUT:
+            self.current_state = self.FINISH
+            self.our_defender.catcher = 'open'
+            return kick_ball()
+
+        # TODO
+        partner_in_place = True
+        elif partner_in_place:
+            # Pause for a bit just in case
+            if self.pass_pause_start_time == -1:
+                self.pass_pause_start_time = time.clock()
+            elif time.clock - self.pass_pause_start_time > PASS_PAUSE:
+                self.current_state = self.FINISH
+                self.our_defender.catcher = 'open'
+                return kick_ball()
+        else:
+            # Reset pause time
+            if self.pass_pause_start_time != -1:
+                self.pass_pause_start_time = -1
 
     def shoot(self):
-        self.our_defender.catcher = 'open'
         self.current_state = self.FINISH
+        self.our_defender.catcher = 'open'
         return kick_ball(DEFAULT_KICK_POWER)
 
     
     def finish(self):
-        # self.current_state = self.PREPARE
         return do_nothing()
 
 class Milestone2Attacker(Strategy):
