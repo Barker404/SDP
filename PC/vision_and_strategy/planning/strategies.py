@@ -54,7 +54,7 @@ class Milestone3Catch(Strategy):
     def __init__(self, world):
         super(Milestone3Catch, self).__init__(world, self.STATES)
         self.NEXT_ACTION_MAP = {
-            self.PREPARE: self.prepare
+            self.PREPARE: self.prepare,
             self.ALIGN_DOWN: self.align_down,
             self.FOLLOW: self.follow,
             self.ALIGN_PASS: self.align_pass
