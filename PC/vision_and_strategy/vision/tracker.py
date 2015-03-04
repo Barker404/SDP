@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 from collections import namedtuple
 import warnings
 
@@ -36,17 +37,18 @@ class Tracker(object):
 
             # Create a mask
             frame_mask = cv2.inRange(frame_hsv, adjustments['min'], adjustments['max'])
-            frame_mask = cv2.morphologyEx(frame_mask, cv2.MORPH_OPEN, np.ones((3,3), np.uint8))
+
             # Apply threshold to the masked image, no idea what the values mean
-            # return_val, threshold = cv2.threshold(frame_mask, 127, 255, 0)
+            return_val, threshold = cv2.threshold(frame_mask, 127, 255, 0)
 
             # Find contours
             contours, hierarchy = cv2.findContours(
-                frame_mask,
+                threshold,
                 cv2.RETR_TREE,
                 cv2.CHAIN_APPROX_SIMPLE
             )
-            # print contours
+
+            #print contours
             return contours
         except:
             return None
@@ -75,11 +77,11 @@ class Tracker(object):
         erosion = cv2.erode(frame_mask, kernel, iterations=1)
 
         # Apply threshold to the masked image, no idea what the values mean
-        # return_val, threshold = cv2.threshold(frame_mask, 127, 255, 0)
-        frame_mask = cv2.morphologyEx(frame_mask, cv2.MORPH_OPEN, np.ones((3,3), np.uint8))
+        return_val, threshold = cv2.threshold(frame_mask, 127, 255, 0)
+
         # Find contours, they describe the masked image - our T
         contours, hierarchy = cv2.findContours(
-            frame_mask,
+            threshold,
             cv2.RETR_TREE,
             cv2.CHAIN_APPROX_SIMPLE
         )
@@ -186,7 +188,7 @@ class RobotTracker(Tracker):
         contours = self.get_contours(frame.copy(), adjustments)
         return self.get_contour_corners(self.join_contours(contours))
 
-    def get_dot(self, frame, x_offset, y_offset):
+    def get_dot(self, frame, x_offset, y_offset, plate_corners, angle=None):
         """
         Find center point of the black dot on the plate.
 
@@ -195,33 +197,65 @@ class RobotTracker(Tracker):
             2. Fill a dummy frame with black and draw white cirlce around to create a mask.
             3. Mask against the frame to eliminate any robot parts looking like dark dots.
             4. Use contours to detect the dot and return it's center.
-
-        Params:
-            frame       The frame to search
-            x_offset    The offset from the uncropped image - to be added to the final values
-            y_offset    The offset from the uncropped image - to be added to the final values
+ 
+       Params:
+            frame         The frame to search
+            x_offset      The offset from the uncropped image - to be added to the final values
+            y_offset      The offset from the uncropped image - to be added to the final values
+            plate_corners The corners of the plate detected
         """
         # Create dummy mask
         height, width, channel = frame.shape
         if height > 0 and width > 0:
-            mask_frame = frame.copy()
+            
+            # Calculate angle between first two polygons
+            point_pair = (plate_corners[0], plate_corners[1])
+            angle = math.atan2(point_pair[1][1]-point_pair[0][1], 
+                               point_pair[1][0]-point_pair[0][0])
 
-            # Fill the dummy frame
-            cv2.rectangle(mask_frame, (0, 0), (width, height), (0, 0, 0), -1)
-            cv2.circle(mask_frame, (width / 2, height / 2), 9, (255, 255, 255), -1)
+            # Largest contour stored here
+            largest_contour = None
+            area = 0
 
-            # Mask the original image
-            mask_frame = cv2.cvtColor(mask_frame, cv2.COLOR_BGR2GRAY)
-            frame = cv2.bitwise_and(frame, frame, mask=mask_frame)
+            # Attempt circle mask for every multiple of this
+            for theta in [angle, angle + (math.pi/2), angle + (2*math.pi/2), angle + (3*math.pi/2)]:
 
-            adjustment = self.calibration['dot']
-            contours = self.get_contours(frame, adjustment)
+                # Calculate dot's dx,dy based on this theta
+                DOT_DISTANCE = 10
+                dx = DOT_DISTANCE * math.cos(theta)
+                dy = DOT_DISTANCE * math.sin(theta)
 
-            if contours and len(contours) > 0:
-                # Take the largest contour
-                contour = self.get_largest_contour(contours)
-                (x, y), radius = self.get_contour_centre(contour)
-                return Center(x + x_offset, y + y_offset)
+                mask_frame = frame.copy()
+                screen_frame = frame.copy()
+
+                # Fill the dummy frame
+                cv2.rectangle(mask_frame, (0, 0), (width, height), (0, 0, 0), -1)
+                cv2.rectangle(screen_frame, (0, 0), (width, height), (360, 100, 100), -1)
+
+                cv2.circle(mask_frame, (int(dx + (width / 2)), int(dy + (height / 2))), 4, (255, 255, 255), -1)
+
+                # Mask the original image
+                mask_frame = cv2.cvtColor(mask_frame, cv2.COLOR_BGR2GRAY)
+                cv2.bitwise_and(frame, frame, screen_frame, mask=mask_frame)
+
+                adjustment = self.calibration['dot']
+                contours = self.get_contours(screen_frame, adjustment)
+
+                if contours and len(contours) > 0:
+                    # Take the largest contour
+                    contour = self.get_largest_contour(contours)
+                    contour_area = cv2.contourArea(contour)
+
+                    # Replace previous if this is larger
+                    if largest_contour is None or contour_area > area:
+                        area = contour_area
+                        largest_contour = contour
+
+            if largest_contour is None:
+                return Center(0,0)
+
+            (x, y), radius = self.get_contour_centre(largest_contour)
+            return Center(x + x_offset, y + y_offset)
 
     def find(self, frame, queue):
         """
@@ -252,7 +286,7 @@ class RobotTracker(Tracker):
 
         # (1) Find the plates
         plate_corners = self.get_plate(frame)
-
+        
         if plate_corners is not None:
             # Find the bounding box
             plate_bound_box = self.get_bounding_box(plate_corners)
@@ -269,14 +303,15 @@ class RobotTracker(Tracker):
                 ]
 
                 # (3) Search for the dot
-                dot = self.get_dot(plate_frame, plate_bound_box.x + self.offset, plate_bound_box.y)
+                # 
+                # Pass in corners of the plate for dot estimation
+                dot = self.get_dot(plate_frame, plate_bound_box.x + self.offset, plate_bound_box.y, plate_corners)
 
                 if dot is not None:
                     # Since get_dot adds offset, we need to remove it
                     dot_temp = Center(dot[0] - self.offset, dot[1])
 
                     # Find two points from plate_corners that are the furthest from the dot
-
                     distances = [
                         (
                             (dot_temp.x - p[0])**2 + (dot_temp.y - p[1])**2,  # distance
@@ -294,7 +329,7 @@ class RobotTracker(Tracker):
                     first = front[0]
                     front_rear_distances = [
                         (
-                            (first[1] - p[0])**2 + (first[2] - p[1])**2,
+                            (first[1] - p[1])**2 + (first[2] - p[2])**2,
                             p[1],
                             p[2]
                         ) for p in rear]
@@ -302,6 +337,7 @@ class RobotTracker(Tracker):
 
                     # Put the results together
                     sides = [
+                    
                         (
                             Center(first[1], first[2]),
                             Center(front_rear_distances[0][1], front_rear_distances[0][2])
@@ -402,6 +438,7 @@ class BallTracker(Tracker):
         self.calibration = calibration
 
     def find(self, frame, queue):
+
         for color in self.color:
             contours, hierarchy, mask = self.preprocess(
                 frame,
