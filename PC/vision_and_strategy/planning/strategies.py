@@ -47,18 +47,24 @@ class Milestone3Catch(Strategy):
     # (If grab fails, try to pick up ball?)
 
 
-    PREPARE, ALIGN_DOWN, FOLLOW, ALIGN_PASS = \
-        'PREPARE', 'ALIGN_DOWN', 'FOLLOW', 'ALIGN_PASS'
-    STATES = [PREPARE, ALIGN_DOWN, FOLLOW, ALIGN_PASS]
+    PREPARE, FOLLOW, ALIGN_PASS = \
+        'PREPARE', 'FOLLOW', 'ALIGN_PASS'
+    STATES = [PREPARE, FOLLOW, ALIGN_PASS]
 
     def __init__(self, world):
         super(Milestone3Catch, self).__init__(world, self.STATES)
         self.NEXT_ACTION_MAP = {
             self.PREPARE: self.prepare,
-            self.ALIGN_DOWN: self.align_down,
             self.FOLLOW: self.follow,
             self.ALIGN_PASS: self.align_pass
         }
+
+        if self.world._our_side == 'left':
+            self.min_x = 50
+            self.max_x = 80
+        else:
+            self.min_x = 460
+            self.max_x = 490
 
         self.our_attacker = self.world.our_attacker
         self.their_attacker = self.world.their_attacker
@@ -66,7 +72,7 @@ class Milestone3Catch(Strategy):
         self.ball = self.world.ball
 
     def prepare(self):
-        self.current_state = self.ALIGN_DOWN
+        self.current_state = self.FOLLOW
         if self.our_attacker.catcher != 'open':
             self.our_attacker.catcher = 'open'
             return open_catcher()
@@ -85,10 +91,11 @@ class Milestone3Catch(Strategy):
 
     def follow(self):
         if in_line(self.our_defender, self.our_attacker):
-            self.current_state = self.PREPARE_CATCH
+            self.current_state = self.ALIGN_PASS
             return do_nothing()
         else:
-            displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
+            x_value = min(self.max_x, max(self.min_x, self.our_defender.x))
+            displacement, angle = self.our_defender.get_direction_to_point(x_value,
                                                                            self.our_attacker.y)
             return calculate_motor_speed(displacement, angle, careful=True, backwards_ok=True)
 
@@ -100,7 +107,7 @@ class Milestone3Catch(Strategy):
             action = calculate_motor_speed(None, angle, careful=True, backwards_ok=True)
             return action
         else:
-            self.current_state = self.ALIGN_DOWN
+            self.current_state = self.FOLLOW
             return do_nothing()
 
 
