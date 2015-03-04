@@ -173,7 +173,6 @@ class Milestone3Kick(Strategy):
             return open_catcher()
 
     def avoid(self):
-        print self.our_defender.has_ball(self.ball)
         midpont = self.world.pitch.height/2
         if self.their_attacker.y < midpont:
             blocked_side = 'bottom'
@@ -227,25 +226,27 @@ class Milestone3Kick(Strategy):
         if self.lineup_wait_start_time == -1:
             self.lineup_wait_start_time = time.clock()
         
-        # TODO
-        partner_in_place = True
         # Shoot anyway after timeout
-        if time.clock - self.lineup_wait_start_time > self.LINEUP_TIMEOUT:
+        if time.clock() - self.lineup_wait_start_time > self.LINEUP_TIMEOUT:
             self.current_state = self.FINISH
             self.our_defender.catcher = 'open'
-            return kick_ball()
+            return kick_ball(DEFAULT_KICK_POWER)
         elif in_line(self.our_defender, self.our_attacker) and is_facing(self.our_attacker, self.our_defender, careful=True):
             # Pause for a bit just in case
             if self.pass_pause_start_time == -1:
                 self.pass_pause_start_time = time.clock()
-            elif time.clock - self.pass_pause_start_time > PASS_PAUSE:
+                return do_nothing()
+            elif time.clock() - self.pass_pause_start_time > self.PASS_PAUSE:
                 self.current_state = self.FINISH
                 self.our_defender.catcher = 'open'
-                return kick_ball()
+                return kick_ball(DEFAULT_KICK_POWER)
+            else:
+                return do_nothing()
         else:
             # Reset pause time
             if self.pass_pause_start_time != -1:
                 self.pass_pause_start_time = -1
+            return do_nothing()
 
     def shoot(self):
         self.current_state = self.FINISH
