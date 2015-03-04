@@ -234,7 +234,7 @@ class Milestone3Kick(Strategy):
             self.current_state = self.FINISH
             self.our_defender.catcher = 'open'
             return kick_ball()
-        elif in_line(self.our_defender, self.our_attacker) and is_facing(self.our_attacker, self.our_defender):
+        elif in_line(self.our_defender, self.our_attacker) and is_facing(self.our_attacker, self.our_defender, careful=True):
             # Pause for a bit just in case
             if self.pass_pause_start_time == -1:
                 self.pass_pause_start_time = time.clock()
