@@ -3,7 +3,7 @@ import math
 from random import randint
 import time
 
-DEFAULT_KICK_POWER = 80
+DEFAULT_KICK_POWER = 35
 
 class Strategy(object):
 
