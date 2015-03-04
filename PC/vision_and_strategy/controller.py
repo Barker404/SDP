@@ -266,7 +266,6 @@ if __name__ == '__main__':
     parser.add_argument("pitch", help="[0] Main pitch, [1] Secondary pitch")
     parser.add_argument("side", help="The side of our defender - ['left', 'right'] allowed.")
     parser.add_argument("color", help="The color of our team - ['yellow', 'blue'] allowed.")
-    parser.add_argument("robot", help="The robot we control (for milestones) - [attacker, defender] allowed")
     parser.add_argument("task", help="Whether to kick or catch (for milestone 3) - [kick, catch] allowed")
     parser.add_argument(
         "obstacle", help="Whether or not there is an obstacle (for milestone 3) - [none, obstacle] allowed")
@@ -279,6 +278,8 @@ if __name__ == '__main__':
     else:
         comms = 1
 
+    robot = 'defender'
+
     c = Controller(
         pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms, 
-        robot=args.robot, task=args.task, obstacle=args.obstacle).wow()
+        robot=robot, task=args.task, obstacle=args.obstacle).wow()
