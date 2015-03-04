@@ -33,7 +33,6 @@ class Strategy(object):
     def generate(self):
         return self.NEXT_ACTION_MAP[self.current_state]()
 
-
 class Milestone3Catch(Strategy):
     # For controlling _defender_
 
@@ -47,17 +46,20 @@ class Milestone3Catch(Strategy):
     # (If grab fails, try to pick up ball?)
 
 
-    PREPARE, FOLLOW, ALIGN_PASS = \
-        'PREPARE', 'FOLLOW', 'ALIGN_PASS'
-    STATES = [PREPARE, FOLLOW, ALIGN_PASS]
+    PREPARE, FOLLOW, ALIGN_PASS, FINISH = \
+        'PREPARE', 'FOLLOW', 'ALIGN_PASS', 'FINISH'
+    STATES = [PREPARE, FOLLOW, ALIGN_PASS, FINISH]
 
     def __init__(self, world):
         super(Milestone3Catch, self).__init__(world, self.STATES)
         self.NEXT_ACTION_MAP = {
             self.PREPARE: self.prepare,
             self.FOLLOW: self.follow,
-            self.ALIGN_PASS: self.align_pass
+            self.ALIGN_PASS: self.align_pass,
+            self.FINISH: self.finish
         }
+
+        self.is_obstacle = True
 
         if self.world._our_side == 'left':
             self.min_x = 50
@@ -72,6 +74,8 @@ class Milestone3Catch(Strategy):
         self.ball = self.world.ball
 
     def prepare(self):
+        print self.is_obstacle
+
         self.current_state = self.FOLLOW
         if self.our_attacker.catcher != 'open':
             self.our_attacker.catcher = 'open'
@@ -101,6 +105,11 @@ class Milestone3Catch(Strategy):
 
     def align_pass(self):
         # Check to move onto grab/chase ball if time
+        if self.our_defender.can_catch_ball(self.ball):
+            self.current_state = self.FINISH
+            self.our_defender.catcher = 'closed'
+            return grab_ball()
+
         if in_line(self.our_defender, self.our_attacker):
             angle = self.our_defender.get_rotation_to_point(self.our_attacker.x,
                                                             self.our_attacker.y)
@@ -110,6 +119,22 @@ class Milestone3Catch(Strategy):
             self.current_state = self.FOLLOW
             return do_nothing()
 
+    def finish(self):
+        return do_nothing()
+
+
+# Superclasses to avoid repeated code
+class Milestone3CatchObstacle(Milestone3Catch):
+
+    def __init__(self, world):
+        super(Milestone3CatchObstacle, self).__init__(world)
+        self.is_obstacle = True
+
+class Milestone3CatchNoObstacle(Milestone3Catch):
+
+    def __init__(self, world):
+        super(Milestone3CatchNoObstacle, self).__init__(world)
+        self.is_obstacle = False
 
 class Milestone3Kick(Strategy):
     # For controlling _defender_
@@ -263,6 +288,20 @@ class Milestone3Kick(Strategy):
     
     def finish(self):
         return do_nothing()
+
+# Superclasses to avoid repeated code
+class Milestone3KickObstacle(Milestone3Kick):
+
+    def __init__(self, world):
+        super(Milestone3KickObstacle, self).__init__(world)
+        self.is_obstacle = True
+
+class Milestone3KickNoObstacle(Milestone3Kick):
+
+    def __init__(self, world):
+        super(Milestone3KickNoObstacle, self).__init__(world)
+        self.is_obstacle = False
+
 
 class Milestone2Attacker(Strategy):
 

@@ -19,7 +19,7 @@ class Planner:
     # This is how far through the strategy they are
     # e.g. when grabing ball, we must -prepare-, -go to the ball-, -grab- it, and be -finished-
 
-    def __init__(self, our_side, pitch_num, task):
+    def __init__(self, our_side, pitch_num, task, is_obstacle):
         self._world = World(our_side, pitch_num)
         # LB: Magic numbers!
         # These should surely be constants in models.py?
@@ -27,11 +27,16 @@ class Planner:
         self._world.our_defender.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 12} #10
         self._world.our_attacker.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 14}
 
-        self._attacker_strategies = { 'milestone3catch' : [Milestone3Catch],
-                                      'milestone3kick' : [Milestone3Kick]}
+        self._attacker_strategies = { 'milestone3catch_obstacle' : [Milestone3CatchObstacle],
+                                      'milestone3catch_no_obstacle' : [Milestone3CatchNoObstacle],
+                                      'milestone3kick_obstacle' : [Milestone3KickObstacle],
+                                      'milestone3kick_no_obstacle' : [Milestone3KickNoObstacle]}
 
-        self._defender_strategies = { 'milestone3catch' : [Milestone3Catch],
-                                      'milestone3kick' : [Milestone3Kick]}
+        self._defender_strategies = { 'milestone3catch_obstacle' : [Milestone3CatchObstacle],
+                                      'milestone3catch_no_obstacle' : [Milestone3CatchNoObstacle],
+                                      'milestone3kick_obstacle' : [Milestone3KickObstacle],
+                                      'milestone3kick_no_obstacle' : [Milestone3KickNoObstacle]}
+
         # self._attacker_strategies = {'defence' : [AttackerDefend],
         #                              'grab' : [AttackerGrab, AttackerGrabCareful],
         #                              'score' : [AttackerDriveByTurn, AttackerDriveBy, AttackerTurnScore, AttackerScoreDynamic],
@@ -43,12 +48,22 @@ class Planner:
 
         assert task in ['kick', 'catch']
         self.task = task
+        self.is_obstacle = is_obstacle
+
         if task == 'kick':
-            self._defender_state = 'milestone3kick'
-            self._attacker_state = 'milestone3kick'
+            if is_obstacle:
+                self._defender_state = 'milestone3kick_obstacle'
+                self._attacker_state = 'milestone3kick_obstacle'
+            else:
+                self._defender_state = 'milestone3kick_no_obstacle'
+                self._attacker_state = 'milestone3kick_no_obstacle'
         else:
-            self._defender_state = 'milestone3catch'
-            self._attacker_state = 'milestone3catch'
+            if is_obstacle:
+                self._defender_state = 'milestone3catch_obstacle'
+                self._attacker_state = 'milestone3catch_obstacle'
+            else:
+                self._defender_state = 'milestone3catch_no_obstacle'
+                self._attacker_state = 'milestone3catch_no_obstacle'
             
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
         self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
@@ -79,7 +94,8 @@ class Planner:
     @attacker_state.setter
     def attacker_state(self, new_state):
         # LB: assertion looks strange - state is set to things like "grab" at some points - check this
-        assert new_state in ['defence', 'attack', 'milestone3catch', 'milestone3kick']
+        assert new_state in ['defence', 'attack', 'milestone3catch_obstacle', 'milestone3catch_no_obstacle', 
+            'milestone3kick_obstacle', 'milestone3kick_no_obstacle']
         self._attacker_state = new_state
 
     @property
@@ -89,7 +105,8 @@ class Planner:
     @defender_state.setter
     def defender_state(self, new_state):
         # LB: assertion looks strange - state is set to things like "grab" at some points - check this
-        assert new_state in ['defence', 'attack', 'milestone3catch', 'milestone3kick']
+        assert new_state in ['defence', 'attack', 'milestone3catch_obstacle', 'milestone3catch_no_obstacle', 
+            'milestone3kick_obstacle', 'milestone3kick_no_obstacle']
         self._defender_state = new_state
 
     def update_world(self, position_dictionary):
@@ -103,11 +120,19 @@ class Planner:
         assert self.task in ['kick', 'catch']
         
         if self.task == 'kick':
-            state = 'milestone3kick'
-            strategy = Milestone3Kick
+            if self.is_obstacle:
+                state = 'milestone3kick_obstacle'
+                strategy = Milestone3KickObstacle
+            else:
+                state = 'milestone3kick_no_obstacle'
+                strategy = Milestone3KickNoObstacle
         else:
-            state = 'milestone3catch'
-            strategy = Milestone3Catch
+            if self.is_obstacle:
+                state = 'milestone3catch_obstacle'
+                strategy = Milestone3CatchObstacle
+            else:
+                state = 'milestone3catch_no_obstacle'
+                strategy = Milestone3CatchNoObstacle
 
         if robot == 'defender':
             if not self._defender_state == state:
@@ -125,6 +150,7 @@ class Planner:
 
 
 
+        # Old Stuff
         our_defender = self._world.our_defender
         our_attacker = self._world.our_attacker
         their_defender = self._world.their_defender

@@ -18,7 +18,7 @@ class Controller:
     Primary source of robot control. Ties vision and planning together.
     """
 
-    def __init__(self, pitch, color, our_side, robot, task, video_port=0, comm_port='/dev/ttyACM0', comms=1):
+    def __init__(self, pitch, color, our_side, robot, task, obstacle, video_port=0, comm_port='/dev/ttyACM0', comms=1):
         """
         Entry point for the SDP system.
 
@@ -34,10 +34,14 @@ class Controller:
         assert our_side in ['left', 'right']
         assert robot in ['attacker', 'defender']
         assert task in ['catch', 'kick']
+        assert obstacle in ['none', 'obstacle']
+
 
         self.pitch = pitch
         self.attacking = (robot == 'attacker')
+        self.is_obstacle = (obstacle == 'obstacle')
         self.task = task
+
         # Set up the Arduino communications
         self.arduino = Arduino(comm_port, 115200, 1, comms)
 
@@ -57,7 +61,7 @@ class Controller:
         self.postprocessing = Postprocessing()
 
         # Set up main planner
-        self.planner = Planner(our_side=our_side, pitch_num=self.pitch, task=task)
+        self.planner = Planner(our_side=our_side, pitch_num=self.pitch, task=task, is_obstacle=self.is_obstacle)
 
         # Set up GUI
         self.GUI = GUI(calibration=self.calibration, arduino=self.arduino, pitch=self.pitch)
@@ -265,6 +269,8 @@ if __name__ == '__main__':
     parser.add_argument("robot", help="The robot we control (for milestones) - [attacker, defender] allowed")
     parser.add_argument("task", help="Whether to kick or catch (for milestone 3) - [kick, catch] allowed")
     parser.add_argument(
+        "obstacle", help="Whether or not there is an obstacle (for milestone 3) - [none, obstacle] allowed")
+    parser.add_argument(
         "-n", "--nocomms", help="Disables sending commands to the robot.", action="store_true")
 
     args = parser.parse_args()
@@ -274,4 +280,5 @@ if __name__ == '__main__':
         comms = 1
 
     c = Controller(
-        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms, robot=args.robot, task=args.task).wow()
+        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms, 
+        robot=args.robot, task=args.task, obstacle=args.obstacle).wow()
