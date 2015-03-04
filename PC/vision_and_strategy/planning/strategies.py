@@ -151,9 +151,9 @@ class Milestone3Kick(Strategy):
     # (Might need to store direction locally)
 
 
-    PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, WAIT, SHOOT, FINISH = \
-        'PREPARE', 'GET_BALL', 'GRAB_CHECK', 'AVOID', 'ALIGN', 'WAIT', 'SHOOT', 'FINISH'
-    STATES = [PREPARE, GET_BALL, GRAB_CHECK, AVOID, ALIGN, WAIT, SHOOT, FINISH]
+    PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH = \
+        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN', 'WAIT', 'SHOOT', 'FINISH'
+    STATES = [PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH]
 
     def __init__(self, world):
         super(Milestone3Kick, self).__init__(world, self.STATES)
@@ -161,7 +161,6 @@ class Milestone3Kick(Strategy):
         self.NEXT_ACTION_MAP = {
             self.PREPARE: self.prepare,
             self.GET_BALL: self.get_ball,
-            self.GRAB_CHECK: self.grab_check,
             self.AVOID: self.avoid,
             self.ALIGN: self.align,
             self.WAIT: self.wait,
@@ -173,6 +172,9 @@ class Milestone3Kick(Strategy):
         self.LINEUP_TIMEOUT = 10
         self.pass_pause_start_time = -1
         self.PASS_PAUSE = 1
+
+        self.SPACE_THRESHOLD = 60
+
         self.our_attacker = self.world.our_attacker
         self.our_defender = self.world.our_defender
         self.their_attacker = self.world.their_attacker
@@ -189,7 +191,10 @@ class Milestone3Kick(Strategy):
     def get_ball(self):
         displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
         if self.our_defender.can_catch_ball(self.ball):
-            self.current_state = self.GRAB_CHECK
+            if self.is_obstacle:
+                self.current_state = self.AVOID
+            else:
+                self.current_state = self.ALIGN
             self.our_defender.catcher = 'closed'
             return grab_ball()
         else:
@@ -197,7 +202,10 @@ class Milestone3Kick(Strategy):
 
     def grab_check(self):
         if self.our_defender.has_ball(self.ball):
-            self.current_state = self.AVOID
+            if is_obstacle:
+                self.current_state = self.AVOID
+            else:
+                self.current_state = self.ALIGN
             return do_nothing()
         else:
             self.current_state = self.GET_BALL
@@ -211,7 +219,7 @@ class Milestone3Kick(Strategy):
         else:
             blocked_side = 'top'
 
-        if abs(self.their_attacker.y - self.our_defender.y) > 80:
+        if abs(self.their_attacker.y - self.our_defender.y) > self.SPACE_THRESHOLD:
             # Safe to shoot
             self.current_state = self.ALIGN
             return do_nothing()
