@@ -70,7 +70,8 @@ class Milestone3Catch(Strategy):
         if self.our_attacker.catcher != 'open':
             self.our_attacker.catcher = 'open'
             return open_catcher()
-        else return do_nothing()
+        else:
+            return do_nothing()
 
     def align_down(self):
         # This could just check our_defender.angle
