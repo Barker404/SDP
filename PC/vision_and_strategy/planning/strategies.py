@@ -33,6 +33,114 @@ class Strategy(object):
     def generate(self):
         return self.NEXT_ACTION_MAP[self.current_state]()
 
+
+class SimlpePass(Strategy):
+    # For controlling _defender_
+
+    PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH = \
+        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN', 'WAIT', 'SHOOT', 'FINISH'
+    STATES = [PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH]
+
+    def __init__(self, world):
+        super(SimlpePass, self).__init__(world, self.STATES)
+
+        self.NEXT_ACTION_MAP = {
+            self.PREPARE: self.prepare,
+            self.GET_BALL: self.get_ball,
+            self.AVOID: self.avoid,
+            self.ALIGN: self.align,
+            self.WAIT: self.wait,
+            self.SHOOT: self.shoot,
+            self.FINISH: self.finish
+        }
+
+        self.catchTime = -1
+
+        self.SPACE_THRESHOLD = 60
+
+        self.our_attacker = self.world.our_attacker
+        self.our_defender = self.world.our_defender
+        self.their_attacker = self.world.their_attacker
+        self.ball = self.world.ball
+
+    def prepare(self):
+        self.current_state = self.GET_BALL
+        if self.our_defender.catcher == 'closed':
+            self.our_defender.catcher = 'open'
+            return open_catcher()
+        else:
+            return do_nothing()
+
+    def get_ball(self):
+        displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
+        if self.our_defender.can_catch_ball(self.ball):
+            self.current_state = self.AVOID
+            self.catchTime = time.clock()
+            self.our_defender.catcher = 'closed'
+            return grab_ball()
+        else:
+            return calculate_motor_speed(displacement, angle, careful=True)
+
+    def avoid(self):
+        midpont = self.world.pitch.height/2
+        if self.their_attacker.y < midpont:
+            blocked_side = 'bottom'
+        else:
+            blocked_side = 'top'
+
+        if abs(self.their_attacker.y - self.our_defender.y) > self.SPACE_THRESHOLD:
+            # Safe to shoot
+            self.current_state = self.ALIGN
+            return do_nothing()
+        else:
+            if self.world._our_side == 'right':
+                if blocked_side == 'bottom':
+                    # right top
+                    pointX = 448
+                    pointY = self.world.pitch.height
+                else:
+                    # right bottom
+                    pointX = 448
+                    pointY = 0
+            else:
+                if blocked_side == 'bottom':
+                    # left top
+                    pointX = 70
+                    pointY = self.world.pitch.height
+                else:
+                    # left bottom
+                    pointX = 70
+                    pointY = 0
+
+            displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
+            return calculate_motor_speed(displacement, angle, careful=True)
+
+
+    def align(self):
+        # aim horizontally
+        angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
+        
+        # aim directly to our attacker
+        # angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
+        
+        action = calculate_motor_speed(None, angle, careful=True)
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
+            self.current_state = self.SHOOT
+            return do_nothing()
+        else:
+            return action
+
+    def shoot(self):
+        self.current_state = self.FINISH
+        self.our_defender.catcher = 'open'
+        return kick_ball(DEFAULT_KICK_POWER)
+
+    
+    def finish(self):
+        return do_nothing()
+
+
+
 class Milestone3Catch(Strategy):
     # For controlling _defender_
 
@@ -135,181 +243,6 @@ class Milestone3CatchNoObstacle(Milestone3Catch):
     def __init__(self, world):
         super(Milestone3CatchNoObstacle, self).__init__(world)
         self.is_obstacle = False
-
-class Milestone3Kick(Strategy):
-    # For controlling _defender_
-
-    # Check if enemy defender on pitch
-    # If so, find point where we can shoot past
-    # Move to this point
-    # (Maybe move while pass would be blocked? - need to choose direction)
-    # Stop
-    # Turn to face other robot (continuously)
-    # Once it has stopped moving (including turning) pass
-    # (After waiting a short moment?)
-    # (Does current world state include stationary rotation?)
-    # (Might need to store direction locally)
-
-
-    PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH = \
-        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN', 'WAIT', 'SHOOT', 'FINISH'
-    STATES = [PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH]
-
-    def __init__(self, world):
-        super(Milestone3Kick, self).__init__(world, self.STATES)
-
-        self.NEXT_ACTION_MAP = {
-            self.PREPARE: self.prepare,
-            self.GET_BALL: self.get_ball,
-            self.AVOID: self.avoid,
-            self.ALIGN: self.align,
-            self.WAIT: self.wait,
-            self.SHOOT: self.shoot,
-            self.FINISH: self.finish
-        }
-
-        self.lineup_wait_start_time = -1
-        self.LINEUP_TIMEOUT = 10
-        self.pass_pause_start_time = -1
-        self.PASS_PAUSE = 1
-
-        self.SPACE_THRESHOLD = 60
-
-        self.our_attacker = self.world.our_attacker
-        self.our_defender = self.world.our_defender
-        self.their_attacker = self.world.their_attacker
-        self.ball = self.world.ball
-
-    def prepare(self):
-        self.current_state = self.GET_BALL
-        if self.our_defender.catcher == 'closed':
-            self.our_defender.catcher = 'open'
-            return open_catcher()
-        else:
-            return do_nothing()
-
-    def get_ball(self):
-        displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
-        if self.our_defender.can_catch_ball(self.ball):
-            if self.is_obstacle:
-                self.current_state = self.AVOID
-            else:
-                self.current_state = self.ALIGN
-            self.our_defender.catcher = 'closed'
-            return grab_ball()
-        else:
-            return calculate_motor_speed(displacement, angle, careful=True)
-
-    def grab_check(self):
-        if self.our_defender.has_ball(self.ball):
-            if is_obstacle:
-                self.current_state = self.AVOID
-            else:
-                self.current_state = self.ALIGN
-            return do_nothing()
-        else:
-            self.current_state = self.GET_BALL
-            self.our_defender.catcher = 'open'
-            return open_catcher()
-
-    def avoid(self):
-        midpont = self.world.pitch.height/2
-        if self.their_attacker.y < midpont:
-            blocked_side = 'bottom'
-        else:
-            blocked_side = 'top'
-
-        if abs(self.their_attacker.y - self.our_defender.y) > self.SPACE_THRESHOLD:
-            # Safe to shoot
-            self.current_state = self.ALIGN
-            return do_nothing()
-        else:
-            if self.world._our_side == 'right':
-                if blocked_side == 'bottom':
-                    # right top
-                    pointX = 448
-                    pointY = self.world.pitch.height
-                else:
-                    # right bottom
-                    pointX = 448
-                    pointY = 0
-            else:
-                if blocked_side == 'bottom':
-                    # left top
-                    pointX = 70
-                    pointY = self.world.pitch.height
-                else:
-                    # left bottom
-                    pointX = 70
-                    pointY = 0
-
-            displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
-            return calculate_motor_speed(displacement, angle, careful=True)
-
-
-    def align(self):
-        # aim horizontally
-        angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
-        
-        # aim directly to our attacker
-        # angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
-        
-        action = calculate_motor_speed(None, angle, careful=True)
-        if action['left_motor'] == 0 and action['right_motor'] == 0:
-            self.current_state = self.WAIT
-            return do_nothing()
-        else:
-            return action
-    
-    def wait(self):
-        # Record initial time
-        if self.lineup_wait_start_time == -1:
-            self.lineup_wait_start_time = time.clock()
-
-        # Shoot anyway after timeout
-        if time.clock() - self.lineup_wait_start_time > self.LINEUP_TIMEOUT:
-            self.current_state = self.FINISH
-            self.our_defender.catcher = 'open'
-            return kick_ball(DEFAULT_KICK_POWER)
-        elif in_line(self.our_defender, self.our_attacker) and is_facing(self.our_attacker, self.our_defender):
-            # Pause for a bit just in case
-            if self.pass_pause_start_time == -1:
-                self.pass_pause_start_time = time.clock()
-                return do_nothing()
-            elif time.clock() - self.pass_pause_start_time > self.PASS_PAUSE:
-                self.current_state = self.FINISH
-                self.our_defender.catcher = 'open'
-                return kick_ball(DEFAULT_KICK_POWER)
-            else:
-                return do_nothing()
-        else:
-            # Reset pause time
-            if self.pass_pause_start_time != -1:
-                self.pass_pause_start_time = -1
-            return do_nothing()
-
-    def shoot(self):
-        self.current_state = self.FINISH
-        self.our_defender.catcher = 'open'
-        return kick_ball(DEFAULT_KICK_POWER)
-
-    
-    def finish(self):
-        return do_nothing()
-
-# Superclasses to avoid repeated code
-class Milestone3KickObstacle(Milestone3Kick):
-
-    def __init__(self, world):
-        super(Milestone3KickObstacle, self).__init__(world)
-        self.is_obstacle = True
-
-class Milestone3KickNoObstacle(Milestone3Kick):
-
-    def __init__(self, world):
-        super(Milestone3KickNoObstacle, self).__init__(world)
-        self.is_obstacle = False
-
 
 class Milestone2Attacker(Strategy):
 
