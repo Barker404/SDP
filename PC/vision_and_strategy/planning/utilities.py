@@ -2,8 +2,8 @@ from math import tan, pi, hypot, log
 from planning.models import Robot
 
 DISTANCE_MATCH_THRESHOLD = 15
-ANGLE_MATCH_THRESHOLD = pi/8
-BALL_ANGLE_THRESHOLD = pi/15
+ANGLE_MATCH_THRESHOLD = pi/10
+BALL_ANGLE_THRESHOLD = pi/20
 CURVE_THRESHOLD = pi/5
 CURVE_SPEED_DIFF = 10
 
@@ -164,7 +164,7 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
                 angle = (angle + pi)
             multiplier = -1
         
-        if (careful and abs(angle) < CURVE_THRESHOLD and abs(angle) > threshold and 
+        if (abs(angle) < CURVE_THRESHOLD and abs(angle) > threshold and 
                 displacement is not None and displacement > DISTANCE_MATCH_THRESHOLD):
             # Move forward curving
             turnSpeedHigh = min(100, TURNING_SPEED_CAREFUL + CURVE_SPEED_DIFF)

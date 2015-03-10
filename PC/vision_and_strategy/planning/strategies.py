@@ -159,40 +159,26 @@ class SimpleBlock(Strategy):
 
 
 
-class Milestone3Catch(Strategy):
+class SimpleBlock(Strategy):
     # For controlling _defender_
 
-    # (Check if enemy defender on pitch?)
-    # (If so, skip to turning to face vertically (face attacker?))
-    # Turn to be facing verically
-    # Stay in line with other robot
-    # Then turn to receive
-    # Should be possible to go back to following from here
-    # Grab when the ball is near enough
-    # (If grab fails, try to pick up ball?)
-
-
-    PREPARE, FOLLOW, ALIGN_PASS, FINISH = \
-        'PREPARE', 'FOLLOW', 'ALIGN_PASS', 'FINISH'
-    STATES = [PREPARE, FOLLOW, ALIGN_PASS, FINISH]
+    PREPARE, FOLLOW = \
+        'PREPARE', 'FOLLOW'
+    STATES = [PREPARE, FOLLOW]
 
     def __init__(self, world):
-        super(Milestone3Catch, self).__init__(world, self.STATES)
+        super(SimpleBlock, self).__init__(world, self.STATES)
         self.NEXT_ACTION_MAP = {
             self.PREPARE: self.prepare,
-            self.FOLLOW: self.follow,
-            self.ALIGN_PASS: self.align_pass,
-            self.FINISH: self.finish
+            self.FOLLOW: self.follow
         }
 
-        self.is_obstacle = True
-
         if self.world._our_side == 'left':
-            self.min_x = 50
-            self.max_x = 80
+            self.min_x = 60
+            self.max_x = 90
         else:
-            self.min_x = 460
-            self.max_x = 490
+            self.min_x = 450
+            self.max_x = 470
 
         self.our_attacker = self.world.our_attacker
         self.their_attacker = self.world.their_attacker
@@ -200,8 +186,6 @@ class Milestone3Catch(Strategy):
         self.ball = self.world.ball
 
     def prepare(self):
-        print self.is_obstacle
-
         self.current_state = self.FOLLOW
         if self.our_attacker.catcher != 'open':
             self.our_attacker.catcher = 'open'
@@ -209,58 +193,27 @@ class Milestone3Catch(Strategy):
         else:
             return do_nothing()
 
-    def align_down(self):
-        # This could just check our_defender.angle
-        angle = self.our_defender.get_rotation_to_point(self.our_defender.x, 0)
-        action = calculate_motor_speed(None, angle, careful=True)
-        if action['left_motor'] == 0 and action['right_motor'] == 0:
-            self.current_state = self.FOLLOW
-            return do_nothing()
-        else:
-            return action
-
     def follow(self):
-        if in_line(self.our_defender, self.our_attacker, careful=True):
-            self.current_state = self.ALIGN_PASS
-            return do_nothing()
+
+        x_aim = min(self.max_x, max(self.min_x, self.our_defender.x))
+
+        predicted_y = None
+        # Predict where they are aiming.
+        if self.ball.velocity > BALL_VELOCITY:
+            predicted_y = predict_y_intersection(self.world, x_aim, self.ball, bounce=False)
+
+        if predicted_y is not None:
+            displacement, angle = self.our_defender.get_direction_to_point(x_aim, predicted_y)
+            action = calculate_motor_speed(displacement, angle, backwards_ok=True, careful=True)
         else:
-            x_value = min(self.max_x, max(self.min_x, self.our_defender.x))
-            displacement, angle = self.our_defender.get_direction_to_point(x_value,
-                                                                           self.our_attacker.y)
-            return calculate_motor_speed(displacement, angle, careful=True, backwards_ok=True)
+            y = self.ball.y
+            y = min(max(y, 80), self.world._pitch.height - 80)
 
-    def align_pass(self):
-        # Check to move onto grab/chase ball if time
-        if self.our_defender.can_catch_ball(self.ball):
-            self.current_state = self.FINISH
-            self.our_defender.catcher = 'closed'
-            return grab_ball()
+            displacement, angle = self.our_defender.get_direction_to_point(x_aim, y)
+            action = calculate_motor_speed(displacement, angle, backwards_ok=True, careful=True)
 
-        if in_line(self.our_defender, self.our_attacker, careful=True):
-            angle = self.our_defender.get_rotation_to_point(self.our_attacker.x,
-                                                            self.our_attacker.y)
-            action = calculate_motor_speed(None, angle, careful=True, backwards_ok=True)
-            return action
-        else:
-            self.current_state = self.FOLLOW
-            return do_nothing()
+        return action
 
-    def finish(self):
-        return do_nothing()
-
-
-# Superclasses to avoid repeated code
-class Milestone3CatchObstacle(Milestone3Catch):
-
-    def __init__(self, world):
-        super(Milestone3CatchObstacle, self).__init__(world)
-        self.is_obstacle = True
-
-class Milestone3CatchNoObstacle(Milestone3Catch):
-
-    def __init__(self, world):
-        super(Milestone3CatchNoObstacle, self).__init__(world)
-        self.is_obstacle = False
 
 class Milestone2Attacker(Strategy):
 

@@ -72,7 +72,6 @@ class Planner:
 
     @attacker_state.setter
     def attacker_state(self, new_state):
-        # LB: assertion looks strange - state is set to things like "grab" at some points - check this
         assert new_state in ['defend', 'pass']
         self._attacker_state = new_state
 
@@ -82,7 +81,6 @@ class Planner:
 
     @defender_state.setter
     def defender_state(self, new_state):
-        # LB: assertion looks strange - state is set to things like "grab" at some points - check this
         assert new_state in ['defend', 'pass']
         self._defender_state = new_state
 
