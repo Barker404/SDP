@@ -34,7 +34,7 @@ class Strategy(object):
         return self.NEXT_ACTION_MAP[self.current_state]()
 
 
-class SimlpePass(Strategy):
+class SimplePass(Strategy):
     # For controlling _defender_
 
     PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH = \
@@ -42,7 +42,7 @@ class SimlpePass(Strategy):
     STATES = [PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH]
 
     def __init__(self, world):
-        super(SimlpePass, self).__init__(world, self.STATES)
+        super(SimplePass, self).__init__(world, self.STATES)
 
         self.NEXT_ACTION_MAP = {
             self.PREPARE: self.prepare,
@@ -137,6 +137,24 @@ class SimlpePass(Strategy):
 
     
     def finish(self):
+        return do_nothing()
+
+
+class SimpleBlock(Strategy):
+    # For controlling _defender_
+
+    PREPARE = \
+        'PREPARE'
+    STATES = [PREPARE]
+
+    def __init__(self, world):
+        super(SimpleBlock, self).__init__(world, self.STATES)
+
+        self.NEXT_ACTION_MAP = {
+            self.PREPARE: self.prepare,
+        }
+
+    def prepare(self):
         return do_nothing()
 
 

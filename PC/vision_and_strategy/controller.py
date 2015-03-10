@@ -18,7 +18,7 @@ class Controller:
     Primary source of robot control. Ties vision and planning together.
     """
 
-    def __init__(self, pitch, color, our_side, robot, task, obstacle, video_port=0, comm_port='/dev/ttyACM0', comms=1):
+    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM0', comms=1):
         """
         Entry point for the SDP system.
 
@@ -32,15 +32,8 @@ class Controller:
         assert pitch in [0, 1]
         assert color in ['yellow', 'blue']
         assert our_side in ['left', 'right']
-        assert robot in ['attacker', 'defender']
-        assert task in ['catch', 'kick']
-        assert obstacle in ['none', 'obstacle']
-
 
         self.pitch = pitch
-        self.attacking = (robot == 'attacker')
-        self.is_obstacle = (obstacle == 'obstacle')
-        self.task = task
 
         # Set up the Arduino communications
         self.arduino = Arduino(comm_port, 115200, 1, comms)
@@ -61,7 +54,7 @@ class Controller:
         self.postprocessing = Postprocessing()
 
         # Set up main planner
-        self.planner = Planner(our_side=our_side, pitch_num=self.pitch, task=task, is_obstacle=self.is_obstacle)
+        self.planner = Planner(our_side=our_side, pitch_num=self.pitch)
 
         # Set up GUI
         self.GUI = GUI(calibration=self.calibration, arduino=self.arduino, pitch=self.pitch)
@@ -104,28 +97,14 @@ class Controller:
 
                 self.planner.update_world(model_positions)
                 attacker_actions = None
-                defender_actions = None
-                attackerState = None
-                defenderState = None
+                attacker_state = None
 
-                # Milestone 2: we are either attacking or defending
-                if self.attacking:
-                    # LB: again with the two robots
-                    attacker_actions = self.planner.plan('attacker')
+                defender_actions = self.planner.plan('defender')
 
-                    if self.robot is not None:
-                        self.robot.execute(self.arduino, attacker_actions)
+                if self.robot is not None:
+                    self.robot.execute(self.arduino, defender_actions)
 
-                    # Information about states
-                    # LB: These should also include the current strategy name
-                    attackerState = (self.planner.attacker_state, self.planner.attacker_strat_state)
-                else:   
-                    defender_actions = self.planner.plan('defender')
-
-                    if self.robot is not None:
-                        self.robot.execute(self.arduino, defender_actions)
-
-                    defenderState = (self.planner.defender_state, self.planner.defender_strat_state)
+                defender_state = (self.planner.defender_state, self.planner.defender_strat_state)
 
                 ### Interface ###
 
@@ -144,8 +123,8 @@ class Controller:
 
                 # Draw vision content and actions
                 self.GUI.draw(
-                    frame, model_positions, actions, regular_positions, fps, attackerState,
-                    defenderState, attacker_actions, defender_actions, grabbers,
+                    frame, model_positions, actions, regular_positions, fps, attacker_state,
+                    defender_state, attacker_actions, defender_actions, grabbers,
                     our_color=self.color, our_side=self.side, key=c, preprocess=pre_options)
                 counter += 1
 
@@ -189,7 +168,7 @@ class Robot_Controller(object):
                     left_motor = int(action['left_motor'])
                 if 'right_motor' in action:
                     right_motor = int(action['right_motor'])
-                msg = 'RUN_ENG %d %d\r' % (max(min(left_motor, 99), -99), max(min(right_motor, 99), -99))
+                msg = '\rRUN_ENG %d %d\r' % (max(min(left_motor, 99), -99), max(min(right_motor, 99), -99))
                 comm.write(msg)
 
             if 'speed' in action:
@@ -198,26 +177,23 @@ class Robot_Controller(object):
 
             if 'kicker' in action and action['kicker'] != 0:
                 try:
-                    comm.write('RUN_KICK %d\r' % (action['kicker']))
-                    comm.write('RUN_KICK %d\r' % (action['kicker']))
-                    # Let the kick finish before we tell it what else to do
+                    comm.write('\rRUN_KICK %d\r' % (action['kicker']))
                 except StandardError:
                     pass
             elif 'catcher' in action and action['catcher'] != 0:
                 try:
-                    comm.write('RUN_CATCH\r')
+                    comm.write('\rRUN_CATCH\r')
                 except StandardError:
                     pass
             elif 'drop' in action and action['drop'] != 0:
                 try:
-                    comm.write('DROP\r')
+                    comm.write('\rDROP\r')
                 except StandardError:
                     pass
 
     def shutdown(self, comm):
-        comm.write('RUN_ENG %d %d\r' % (0, 0))
+        comm.write('\rRUN_ENG %d %d\r' % (0, 0))
         time.sleep(1)
-        # comm.write('RUN_KICK 50\r')
 
 
 class Arduino:
@@ -246,7 +222,7 @@ class Arduino:
                     print "Continuing without comms."
                     self.comms = 0
         else:
-            self.write('RUN_ENG %d %d\r' % (0, 0))
+            self.write('\rRUN_ENG %d %d\r' % (0, 0))
             self.comms = 0
 
     def write(self, string):
@@ -266,9 +242,6 @@ if __name__ == '__main__':
     parser.add_argument("pitch", help="[0] Main pitch, [1] Secondary pitch")
     parser.add_argument("side", help="The side of our defender - ['left', 'right'] allowed.")
     parser.add_argument("color", help="The color of our team - ['yellow', 'blue'] allowed.")
-    parser.add_argument("task", help="Whether to kick or catch (for milestone 3) - [kick, catch] allowed")
-    parser.add_argument(
-        "obstacle", help="Whether or not there is an obstacle (for milestone 3) - [none, obstacle] allowed")
     parser.add_argument(
         "-n", "--nocomms", help="Disables sending commands to the robot.", action="store_true")
 
@@ -278,8 +251,5 @@ if __name__ == '__main__':
     else:
         comms = 1
 
-    robot = 'defender'
-
     c = Controller(
-        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms, 
-        robot=robot, task=args.task, obstacle=args.obstacle).wow()
+        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms).wow()

@@ -19,7 +19,7 @@ class Planner:
     # This is how far through the strategy they are
     # e.g. when grabing ball, we must -prepare-, -go to the ball-, -grab- it, and be -finished-
 
-    def __init__(self, our_side, pitch_num, task, is_obstacle):
+    def __init__(self, our_side, pitch_num):
         self._world = World(our_side, pitch_num)
         # LB: Magic numbers!
         # These should surely be constants in models.py?
@@ -27,15 +27,10 @@ class Planner:
         self._world.our_defender.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 12} #10
         self._world.our_attacker.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 14}
 
-        self._attacker_strategies = { 'milestone3catch_obstacle' : [Milestone3CatchObstacle],
-                                      'milestone3catch_no_obstacle' : [Milestone3CatchNoObstacle],
-                                      'milestone3kick_obstacle' : [Milestone3KickObstacle],
-                                      'milestone3kick_no_obstacle' : [Milestone3KickNoObstacle]}
-
-        self._defender_strategies = { 'milestone3catch_obstacle' : [Milestone3CatchObstacle],
-                                      'milestone3catch_no_obstacle' : [Milestone3CatchNoObstacle],
-                                      'milestone3kick_obstacle' : [Milestone3KickObstacle],
-                                      'milestone3kick_no_obstacle' : [Milestone3KickNoObstacle]}
+        self._attacker_strategies = { 'pass'   : [SimplePass],
+                                      'defend' : [SimpleBlock]}
+        self._defender_strategies = { 'pass'   : [SimplePass],
+                                      'defend' : [SimpleBlock]}
 
         # self._attacker_strategies = {'defence' : [AttackerDefend],
         #                              'grab' : [AttackerGrab, AttackerGrabCareful],
@@ -46,24 +41,8 @@ class Planner:
         #                              'grab' : [DefenderGrab],
         #                              'pass' : [DefenderBouncePass]}
 
-        assert task in ['kick', 'catch']
-        self.task = task
-        self.is_obstacle = is_obstacle
-
-        if task == 'kick':
-            if is_obstacle:
-                self._defender_state = 'milestone3kick_obstacle'
-                self._attacker_state = 'milestone3kick_obstacle'
-            else:
-                self._defender_state = 'milestone3kick_no_obstacle'
-                self._attacker_state = 'milestone3kick_no_obstacle'
-        else:
-            if is_obstacle:
-                self._defender_state = 'milestone3catch_obstacle'
-                self._attacker_state = 'milestone3catch_obstacle'
-            else:
-                self._defender_state = 'milestone3catch_no_obstacle'
-                self._attacker_state = 'milestone3catch_no_obstacle'
+        self._attacker_state = 'defend'
+        self._defender_state = 'defend'
             
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
         self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
@@ -94,8 +73,7 @@ class Planner:
     @attacker_state.setter
     def attacker_state(self, new_state):
         # LB: assertion looks strange - state is set to things like "grab" at some points - check this
-        assert new_state in ['defence', 'attack', 'milestone3catch_obstacle', 'milestone3catch_no_obstacle', 
-            'milestone3kick_obstacle', 'milestone3kick_no_obstacle']
+        assert new_state in ['defend', 'pass']
         self._attacker_state = new_state
 
     @property
@@ -105,8 +83,7 @@ class Planner:
     @defender_state.setter
     def defender_state(self, new_state):
         # LB: assertion looks strange - state is set to things like "grab" at some points - check this
-        assert new_state in ['defence', 'attack', 'milestone3catch_obstacle', 'milestone3catch_no_obstacle', 
-            'milestone3kick_obstacle', 'milestone3kick_no_obstacle']
+        assert new_state in ['defend', 'pass']
         self._defender_state = new_state
 
     def update_world(self, position_dictionary):
@@ -116,38 +93,10 @@ class Planner:
     # I also don't think robot should have a default - to avoid forgetting the parameter
     # But we need to check if it is used anywhere without the parameter
     def plan(self, robot='attacker'):
-        assert robot in ['attacker', 'defender']
-        assert self.task in ['kick', 'catch']
-        
-        if self.task == 'kick':
-            if self.is_obstacle:
-                state = 'milestone3kick_obstacle'
-                strategy = Milestone3KickObstacle
-            else:
-                state = 'milestone3kick_no_obstacle'
-                strategy = Milestone3KickNoObstacle
-        else:
-            if self.is_obstacle:
-                state = 'milestone3catch_obstacle'
-                strategy = Milestone3CatchObstacle
-            else:
-                state = 'milestone3catch_no_obstacle'
-                strategy = Milestone3CatchNoObstacle
+        assert robot == 'defender'
 
-        if robot == 'defender':
-            if not self._defender_state == state:
-                self._defender_state = state
-            if not isinstance(self._defender_current_strategy, strategy):
-                self._defender_current_strategy = self.choose_defender_strategy(self._world)
-            return self._defender_current_strategy.generate()
-
-        if robot == 'attacker':
-            if not self._attacker_state == state:
-                self._attacker_state = state
-            if not isinstance(self._attacker_current_strategy, strategy):
-                self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
-            return self._attacker_current_strategy.generate()
-
+        # Check strategy changes
+        return self._defender_current_strategy.generate()
 
 
         # Old Stuff
