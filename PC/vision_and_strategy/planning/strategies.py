@@ -37,9 +37,9 @@ class Strategy(object):
 class SimplePass(Strategy):
     # For controlling _defender_
 
-    PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH = \
-        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN', 'WAIT', 'SHOOT', 'FINISH'
-    STATES = [PREPARE, GET_BALL, AVOID, ALIGN, WAIT, SHOOT, FINISH]
+    PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_ANY, SHOOT = \
+        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_ANY', 'SHOOT'
+    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_ANY, SHOOT]
 
     def __init__(self, world):
         super(SimplePass, self).__init__(world, self.STATES)
@@ -48,13 +48,14 @@ class SimplePass(Strategy):
             self.PREPARE: self.prepare,
             self.GET_BALL: self.get_ball,
             self.AVOID: self.avoid,
-            self.ALIGN: self.align,
-            self.WAIT: self.wait,
-            self.SHOOT: self.shoot,
-            self.FINISH: self.finish
+            self.ALIGN_HORIZ: self.align_horiz,
+            self.ALIGN_ANY: self.align_any,
+            self.SHOOT: self.shoot
         }
 
         self.catchTime = -1
+
+        self.TIME_LIMIT = 8
 
         self.SPACE_THRESHOLD = 60
 
@@ -82,46 +83,45 @@ class SimplePass(Strategy):
             return calculate_motor_speed(displacement, angle, careful=True)
 
     def avoid(self):
+        # Check we aren't out of time
+        if time.clock() - self.catchTime > self.TIME_LIMIT:
+            self.current_state = self.ALIGN_ANY
+
+        bottom_split = self.world.pitch.height/3
+        top_split = bottom_split*2
         midpont = self.world.pitch.height/2
-        if self.their_attacker.y < midpont:
-            blocked_side = 'bottom'
-        else:
-            blocked_side = 'top'
+
 
         if abs(self.their_attacker.y - self.our_defender.y) > self.SPACE_THRESHOLD:
             # Safe to shoot
-            self.current_state = self.ALIGN
+            self.current_state = self.ALIGN_HORIZ
             return do_nothing()
         else:
-            if self.world._our_side == 'right':
-                if blocked_side == 'bottom':
-                    # right top
-                    pointX = 448
-                    pointY = self.world.pitch.height
-                else:
-                    # right bottom
-                    pointX = 448
-                    pointY = 0
+            if self.their_attacker.y < bottom_split:
+                # Bottom blocked
+                pointY = self.world.pitch.height
+            elif self.their_attacker.y > top_split:
+                # Top blocked
+                pointY = 0
             else:
-                if blocked_side == 'bottom':
-                    # left top
-                    pointX = 70
+                # Go whichever way is closest
+                if self.our_defender.y > midpont:
                     pointY = self.world.pitch.height
                 else:
-                    # left bottom
-                    pointX = 70
                     pointY = 0
+
+            if self.world._our_side == 'right':
+                pointX = 448
+            else:
+                pointX = 70
 
             displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
-            return calculate_motor_speed(displacement, angle, careful=True)
+            return calculate_motor_speed(displacement, angle)
 
 
-    def align(self):
+    def align_horiz(self):
         # aim horizontally
         angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
-        
-        # aim directly to our attacker
-        # angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
         
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
@@ -130,33 +130,31 @@ class SimplePass(Strategy):
         else:
             return action
 
+    def align_any(self):
+        # Just aim where the other robot isn't
+        # Aims to middle of pitch (x) either top or bottom (y)
+        midpont = self.world.pitch.height/2
+
+        x_aim = self.world.pitch.width/2
+        if self.their_attacker.y < midpont:
+            y_aim = self.world.pitch.height - 30
+        else:
+            y_aim = 30
+
+        angle = self.our_defender.get_rotation_to_point(x_aim, y_aim)
+        
+        action = calculate_motor_speed(None, angle, careful=True)
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
+            self.current_state = self.SHOOT
+            return do_nothing()
+        else:
+            return action
+
+
     def shoot(self):
-        self.current_state = self.FINISH
+        self.current_state = self.GET_BALL
         self.our_defender.catcher = 'open'
         return kick_ball(DEFAULT_KICK_POWER)
-
-    
-    def finish(self):
-        return do_nothing()
-
-
-class SimpleBlock(Strategy):
-    # For controlling _defender_
-
-    PREPARE = \
-        'PREPARE'
-    STATES = [PREPARE]
-
-    def __init__(self, world):
-        super(SimpleBlock, self).__init__(world, self.STATES)
-
-        self.NEXT_ACTION_MAP = {
-            self.PREPARE: self.prepare,
-        }
-
-    def prepare(self):
-        return do_nothing()
-
 
 
 class SimpleBlock(Strategy):
@@ -202,15 +200,12 @@ class SimpleBlock(Strategy):
         if self.ball.velocity > BALL_VELOCITY:
             predicted_y = predict_y_intersection(self.world, x_aim, self.ball, bounce=False)
 
-        if predicted_y is not None:
-            displacement, angle = self.our_defender.get_direction_to_point(x_aim, predicted_y)
-            action = calculate_motor_speed(displacement, angle, backwards_ok=True, careful=True)
-        else:
-            y = self.ball.y
-            y = min(max(y, 80), self.world._pitch.height - 80)
+        if predicted_y is None:
+            predicted_y = self.ball.y
+            predicted_y = min(max(predicted_y, 80), self.world._pitch.height - 80)
 
-            displacement, angle = self.our_defender.get_direction_to_point(x_aim, y)
-            action = calculate_motor_speed(displacement, angle, backwards_ok=True, careful=True)
+        displacement, angle = self.our_defender.get_direction_to_point(x_aim, predicted_y)
+        action = calculate_motor_speed(displacement, angle, backwards_ok=True)
 
         return action
 

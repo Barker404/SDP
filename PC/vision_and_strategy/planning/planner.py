@@ -42,7 +42,7 @@ class Planner:
         #                              'pass' : [DefenderBouncePass]}
 
         self._attacker_state = 'defend'
-        self._defender_state = 'defend'
+        self._defender_state = 'pass'
             
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
         self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
@@ -94,6 +94,29 @@ class Planner:
         assert robot == 'defender'
 
         # Check strategy changes
+        if self._world._our_side == 'right':
+            zone = self._world.pitch.zones[3]
+        else:
+            zone = self._world.pitch.zones[0]
+        box = zone.boundingBox()
+
+        ball_in_zone = (box[0] <= self._world.ball.x <= box[1] and 
+            box[2] <= self._world.ball.y <= box[3])
+
+        if (((self._world.ball.angle > (5.0/4.0)*pi or 
+                self._world.ball.angle < (3.0/4.0)*pi or 
+                self._world.ball.velocity < BALL_VELOCITY) and 
+                ball_in_zone) or
+                self._world.our_defender.has_ball(self._world.ball) or
+                self._world.our_defender.can_catch_ball(self._world.ball)):
+            if self._defender_state != 'pass':
+                self._defender_state = 'pass'
+                self._defender_current_strategy = self.choose_defender_strategy(self._world)
+        else:
+            if self._defender_state != 'defend':
+                self._defender_state = 'defend'
+                self._defender_current_strategy = self.choose_defender_strategy(self._world)
+
         return self._defender_current_strategy.generate()
 
 
