@@ -19,7 +19,7 @@ class Planner:
     # This is how far through the strategy they are
     # e.g. when grabing ball, we must -prepare-, -go to the ball-, -grab- it, and be -finished-
 
-    def __init__(self, our_side, pitch_num):
+    def __init__(self, our_side, pitch_num, isPenalty=False):
         self._world = World(our_side, pitch_num)
         # LB: Magic numbers!
         # These should surely be constants in models.py?
@@ -30,7 +30,9 @@ class Planner:
         self._attacker_strategies = { 'pass'   : [SimplePass],
                                       'defend' : [SimpleBlock]}
         self._defender_strategies = { 'pass'   : [SimplePass],
-                                      'defend' : [SimpleBlock]}
+                                      'defend' : [SimpleBlock],
+                                      'penalty' : [DefenderPenalty]
+                                      }
 
         # self._attacker_strategies = {'defence' : [AttackerDefend],
         #                              'grab' : [AttackerGrab, AttackerGrabCareful],
@@ -42,8 +44,15 @@ class Planner:
         #                              'pass' : [DefenderBouncePass]}
 
         self._attacker_state = 'defend'
-        self._defender_state = 'pass'
-            
+        
+        if isPenalty:
+            self._defender_state = 'penalty'
+            print "penalty"
+        else:
+            self._defender_state = 'pass'
+            print "pass"
+
+
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
         self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
 
@@ -72,7 +81,7 @@ class Planner:
 
     @attacker_state.setter
     def attacker_state(self, new_state):
-        assert new_state in ['defend', 'pass']
+        assert new_state in ['defend', 'pass', 'penalty']
         self._attacker_state = new_state
 
     @property
@@ -93,6 +102,9 @@ class Planner:
     def plan(self, robot='attacker'):
         assert robot == 'defender'
 
+        if self._defender_state == 'penalty':
+            return self._defender_current_strategy.generate()
+            
         # Check strategy changes
         if self._world._our_side == 'right':
             zone = self._world.pitch.zones[3]

@@ -431,8 +431,9 @@ class Milestone2Defender(Strategy):
 class DefenderPenalty(Strategy):
 
 
-    DEFEND_GOAL = 'DEFEND_GOAL'
-    STATES = [DEFEND_GOAL]
+    STAY, DEFEND_GOAL, STOP = \
+        'STAY','DEFEND_GOAL', 'STOP'
+    STATES = [STAY, DEFEND_GOAL, STOP]
     LEFT, RIGHT = 'left', 'right'
     SIDES = [LEFT, RIGHT]
 
@@ -441,36 +442,53 @@ class DefenderPenalty(Strategy):
         super(DefenderPenalty, self).__init__(world, self.STATES)
 
         self.NEXT_ACTION_MAP = {
-            self.DEFEND_GOAL: self.defend_goal
+            self.STAY: self.stay,
+            self.DEFEND_GOAL: self.defend_goal,
+            self.STOP: self.stop,
         }
 
         self.their_attacker = self.world.their_attacker
         self.our_defender = self.world.our_defender
         self.ball = self.world.ball
+        self.was_shot = False
+
+    def stay(self):
+        kicker_threshold = 3
+        if self.ball.velocity > kicker_threshold and self.ball.velocity<50 :
+            self.current_state = self.DEFEND_GOAL
+            return do_nothing()
+        else:
+            return do_nothing()
+
 
 
     def defend_goal(self):
-        """
-        Run around, blocking shots.
-        """
+
+        if self.our_defender.can_remotely_defend_ball(self.ball):
+            self.our_defender.catcher = 'closed'
+            self.current_state = self.STOP
+            return grab_ball()
+
+        predicted_y = None
         # Predict where they are aiming.
         if self.ball.velocity > BALL_VELOCITY:
             predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.ball, bounce=False)
 
-        if self.ball.velocity <= BALL_VELOCITY or predicted_y is None: 
-            predicted_y = predict_y_intersection(self.world, self.our_defender.x, self.their_attacker, bounce=False)
-
         if predicted_y is not None:
             displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x,
                                                                            predicted_y - 7*math.sin(self.our_defender.angle))
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
+            action = calculate_motor_speed(displacement, angle, backwards_ok=True)
         else:
             y = self.ball.y
             y = max([y, 60])
             y = min([y, self.world._pitch.height - 60])
             displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x, y)
-            return calculate_motor_speed(displacement, angle, backwards_ok=True)
+            action = calculate_motor_speed(displacement, angle, backwards_ok=True)
 
+        return action
+
+    def stop(self):
+        return do_nothing();
 
 class DefenderGrab(Strategy):
 

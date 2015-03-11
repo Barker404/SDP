@@ -18,7 +18,7 @@ class Controller:
     Primary source of robot control. Ties vision and planning together.
     """
 
-    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM0', comms=1):
+    def __init__(self, pitch, color, our_side, video_port=0, comm_port='/dev/ttyACM0', penalty=False, comms=1):
         """
         Entry point for the SDP system.
 
@@ -54,7 +54,7 @@ class Controller:
         self.postprocessing = Postprocessing()
 
         # Set up main planner
-        self.planner = Planner(our_side=our_side, pitch_num=self.pitch)
+        self.planner = Planner(our_side=our_side, pitch_num=self.pitch, isPenalty=penalty)
 
         # Set up GUI
         self.GUI = GUI(calibration=self.calibration, arduino=self.arduino, pitch=self.pitch)
@@ -244,6 +244,8 @@ if __name__ == '__main__':
     parser.add_argument("color", help="The color of our team - ['yellow', 'blue'] allowed.")
     parser.add_argument(
         "-n", "--nocomms", help="Disables sending commands to the robot.", action="store_true")
+    parser.add_argument(
+        "-p", "--penalty", help="Set up for penalty kick", action="store_true")
 
     args = parser.parse_args()
     if args.nocomms:
@@ -252,4 +254,4 @@ if __name__ == '__main__':
         comms = 1
 
     c = Controller(
-        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms).wow()
+        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms, penalty=args.penalty).wow()
