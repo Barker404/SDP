@@ -17,7 +17,7 @@ GOAL_WIDTH = 140
 GOAL_LENGTH = 1
 GOAL_HEIGHT = 10
 
-CATCHING_DISP_THRESHOLD = 7
+CATCHING_DISP_THRESHOLD = 0
 
 class Coordinate(object):
 
@@ -204,7 +204,8 @@ class Robot(PitchObject):
     def catcher_area(self, area_dict):
         self._catcher_area = area_dict
 
-    # LB: This might not be in use - if it is, there might be a better way
+    # A longer catcher area for the actual checks if we can catch the ball
+    # Since we move towards the ball as we catch, we want to start a little before it's all the way in out catcher area
     @property
     def catcher_area_plus(self):
         height = self._catcher_area['height'] + CATCHING_DISP_THRESHOLD
@@ -213,7 +214,7 @@ class Robot(PitchObject):
         front_right = (self.x + self._catcher_area['front_offset'] + height, self.y - width/2.0)
         back_left = (self.x + self._catcher_area['front_offset'], self.y + width/2.0)
         back_right = (self.x + self._catcher_area['front_offset'], self.y - width/2.0)
-        area = Polygon((front_left, front_right, back_left, back_right))
+        area = Polygon((front_left, front_right, back_right, back_left))
         area.rotate(self.angle, self.x, self.y)
         return area
 
@@ -227,6 +228,7 @@ class Robot(PitchObject):
         back_right = (self.x + self._catcher_area['front_offset'], self.y - width/2.0)
         area = Polygon((front_left, front_right, back_left, back_right))
         area.rotate(self.angle, self.x, self.y)
+
         return area
 
     @property
@@ -242,7 +244,7 @@ class Robot(PitchObject):
         '''
         Get if the ball is in the catcher zone but may not have possession
         '''
-        return self.catcher_area_plus.isInside(ball.x, ball.y)
+        return self.catcher_area.isInside(ball.x, ball.y)
 
     def can_remotely_defend_ball(self, ball):
         '''
@@ -256,7 +258,7 @@ class Robot(PitchObject):
         '''
         Milestone 3 hack
         '''
-        return self.catcher_area_plus.isInside(x, y)
+        return self.catcher_area.isInside(x, y)
 
 
     def has_ball(self, ball):

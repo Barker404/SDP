@@ -24,8 +24,8 @@ class Planner:
         # LB: Magic numbers!
         # These should surely be constants in models.py?
         # Also need to make sure grabber area is consistent with our robot
-        self._world.our_defender.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 12} #10
-        self._world.our_attacker.catcher_area = {'width' : 25, 'height' : 18, 'front_offset' : 14}
+        self._world.our_defender.catcher_area = {'width' : 25, 'height' : 27, 'front_offset' : 12} #10
+        self._world.our_attacker.catcher_area = {'width' : 25, 'height' : 27, 'front_offset' : 14}
 
         self._attacker_strategies = { 'pass'   : [SimplePass],
                                       'defend' : [SimpleBlock]}
