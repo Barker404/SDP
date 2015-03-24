@@ -6,23 +6,27 @@ import time
 from cv2 import waitKey
 import sys
 
+MSG_GAP = 0.1
+
 def main():
-	
-	arduino = Arduino('/dev/ttyACM0', 115200, 1, 1)
+    
+    arduino = Arduino('/dev/ttyACM0', 115200, 0.01, 1)
 
-	n = 0
-	c = True
-	while(c != 27):
+    n = 0
+    c = True
+    last_time = time.clock()
+    while(c != 27):
+        now = time.clock()
+        time.sleep(MSG_GAP - (now-last_time))
+        last_time = time.clock()
+        arduino.write("MSGLOL\n\r")
+        n+=1
 
-		arduino.write("Don't lose me!")
-		n+=1
+        lines = arduino.serial.readlines()
+        print "Robo has", lines, "commands"
+        print "We sent", n, "commands"
 
-		if (n % 20) == 0:
-			read = arduino.serial.readline()
-			print "Robo has", read, "commands"
-			print "We sent", n, "commands"
-
-		c = waitKey(2) & 0xFF
+        c = waitKey(2) & 0xFF
 
 class Arduino:
 
@@ -56,12 +60,7 @@ class Arduino:
 
     def write(self, string):
         if self.comms == 1:
-            self.increment_command+=1;
-            if self.last_command != string or self.increment_command > 5:
-                self.increment_command=0;
-                print string
-                self.last_command = string
-                self.serial.write(string)
+            self.serial.write(string)
 
 if __name__ == '__main__':
-			main()
+            main()
