@@ -12,6 +12,7 @@
 #define KICKER_MOTOR 4
 #define CATCHER_MOTOR 2
 
+
 SerialCommand SCmd;   // The demo SerialCommand object
 
 void setup() {
@@ -32,7 +33,7 @@ void setup() {
   SCmd.addCommand("RUN_KICK",kick);            
   SCmd.addCommand("RUN_CATCH", pick_up);         
   SCmd.addCommand("DROP", drop);
-  SCmd.addCommand("RUN_ENG", RUN_ENGINE);
+  SCmd.addCommand("RUN_ENG", RUN_ENGINE);  
   SCmd.addDefaultHandler(unrecognized);
 }
 
@@ -86,18 +87,16 @@ void kick() { //motor 3 not catcher, needs changed
     int power = atoi(powerStr);
     if (power != NULL) {
       
-      motorForward(CATCHER_MOTOR, 100);    //Start opening the catcher first so that the catcher legs don't foul the ball
-      delay(100); //allows the catcher to move out the way so that the kciker can swing out
-      motorBackward(KICKER_MOTOR, power); //when kicking, motor is moving backwards
-      delay(200);
-      motorStop(CATCHER_MOTOR);
+      motorForward(CATCHER_MOTOR,100);
       delay(100);
+      motorBackward(KICKER_MOTOR, power);
+      delay(130);
+      motorStop(CATCHER_MOTOR);
+      delay(70);
       motorStop(KICKER_MOTOR);
-      delay(150);
-      motorForward(KICKER_MOTOR, power); //return the kicker to resting position ready for the ball to be caught again
-      delay(230);
+      motorForward(KICKER_MOTOR, power);
+      delay(200);
       motorStop(KICKER_MOTOR);
-
     }
   }
 }
@@ -112,7 +111,7 @@ void pick_up() {
 
 void drop() {
   motorForward(CATCHER_MOTOR,100);
-  delay(300);
+  delay(230);
   motorStop(CATCHER_MOTOR);
 }
 
@@ -145,4 +144,5 @@ void flash(int interval) {
   digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
   delay(interval);              // wait for a second
 }
+
 
