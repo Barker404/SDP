@@ -125,6 +125,7 @@ class SimplePass(Strategy):
         
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
+            self.shootReadyTime = time.clock()
             self.current_state = self.SHOOT
             return do_nothing()
         else:
@@ -145,6 +146,7 @@ class SimplePass(Strategy):
         
         action = calculate_motor_speed(None, angle, careful=True)
         if action['left_motor'] == 0 and action['right_motor'] == 0:
+            self.shootReadyTime = time.clock()
             self.current_state = self.SHOOT
             return do_nothing()
         else:
@@ -152,9 +154,13 @@ class SimplePass(Strategy):
 
 
     def shoot(self):
-        self.current_state = self.GET_BALL
-        self.our_defender.catcher = 'open'
-        return kick_ball(DEFAULT_KICK_POWER)
+        currentTime = time.clock()
+        if (currentTime - self.shootReadyTime) > 0.5:
+            self.current_state = self.GET_BALL
+            self.our_defender.catcher = 'open'
+            return kick_ball(DEFAULT_KICK_POWER)
+        else:
+            return do_nothing()
 
 
 class SimpleBlock(Strategy):
