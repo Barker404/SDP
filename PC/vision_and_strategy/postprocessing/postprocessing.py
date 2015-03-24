@@ -21,14 +21,21 @@ class Postprocessing(object):
     #: Stores the last CACHE_SIZE vectors in dictionary form
     _frames = []
     _measure = []
-    def __init__(self):
+    def __init__(self, our_side):
         '''
         Initialise the postprocessing at time 0 with default positions for all.
         '''
         self._time = time.time()
+        
         _vectors = {}
+        # Set deafult of our attacker to enemy goal
+        # so if they are never on the pitch, we shoot for a goal instead of passing to (0,0)
+        if (our_side == 'left'):
+            _vectors['our_attacker'] = {'vec': Vector(500, 140, 0, 0), 'time': self._time}
+        else:
+            _vectors['our_attacker'] = {'vec': Vector(0, 140, 0, 0), 'time': self._time}
+
         _vectors['ball'] = {'vec': Vector(0, 0, 0, 0), 'time': self._time}
-        _vectors['our_attacker'] = {'vec': Vector(0, 0, 0, 0), 'time': self._time}
         _vectors['their_attacker'] = {'vec': Vector(0, 0, 0, 0), 'time': self._time}
         _vectors['our_defender'] = {'vec': Vector(0, 0, 0, 0), 'time': self._time}
         _vectors['their_defender'] = {'vec': Vector(0, 0, 0, 0), 'time': self._time}

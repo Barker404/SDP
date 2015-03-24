@@ -51,7 +51,7 @@ class Controller:
             calibration=self.calibration)
 
         # Set up postprocessing for vision
-        self.postprocessing = Postprocessing()
+        self.postprocessing = Postprocessing(our_side)
 
         # Set up main planner
         self.planner = Planner(our_side=our_side, pitch_num=self.pitch, isPenalty=penalty)
