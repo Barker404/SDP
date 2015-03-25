@@ -126,7 +126,7 @@ class Controller:
                     frame, model_positions, actions, regular_positions, fps, attacker_state,
                     defender_state, attacker_actions, defender_actions, grabbers,
                     our_color=self.color, our_side=self.side, key=c, preprocess=pre_options)
-                print "can catch: " + str(self.planner._world.our_defender.can_catch_ball(self.planner._world.ball))
+                # print "can catch: " + str(self.planner._world.our_defender.can_catch_ball(self.planner._world.ball))
                 counter += 1
 
         except:
@@ -231,7 +231,7 @@ class Arduino:
             self.increment_command+=1;
             if self.last_command != string or self.increment_command > 5:
                 self.increment_command=0;
-                print string
+                # print string
                 self.last_command = string
                 self.serial.write(string)
 

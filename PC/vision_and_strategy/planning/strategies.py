@@ -3,7 +3,7 @@ import math
 from random import randint
 import time
 
-DEFAULT_KICK_POWER = 35
+DEFAULT_KICK_POWER = 70
 
 class Strategy(object):
 
@@ -37,9 +37,9 @@ class Strategy(object):
 class SimplePass(Strategy):
     # For controlling _defender_
 
-    PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_ANY, SHOOT = \
-        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_ANY', 'SHOOT'
-    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_ANY, SHOOT]
+    PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, SHOOT = \
+        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_MID_FAR', 'SHOOT'
+    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, SHOOT]
 
     def __init__(self, world):
         super(SimplePass, self).__init__(world, self.STATES)
@@ -49,13 +49,14 @@ class SimplePass(Strategy):
             self.GET_BALL: self.get_ball,
             self.AVOID: self.avoid,
             self.ALIGN_HORIZ: self.align_horiz,
-            self.ALIGN_ANY: self.align_any,
+            self.ALIGN_MID_FAR: self.align_mid_far,
             self.SHOOT: self.shoot
         }
 
         self.catchTime = -1
 
-        self.TIME_LIMIT = 8
+        self.TIME_LIMIT = 9
+        # self.TIME_LIMIT = 2
 
         self.SPACE_THRESHOLD = 60
 
@@ -80,12 +81,17 @@ class SimplePass(Strategy):
             self.our_defender.catcher = 'closed'
             return grab_ball()
         else:
-            return calculate_motor_speed(displacement, angle, careful=True)
+            print displacement
+            if (displacement > 25):
+                return calculate_motor_speed(displacement, angle, careful=True)
+            else:
+                return calculate_motor_speed_for_catch(displacement, angle, careful=True)
 
+####################################################################################################################
     def avoid(self):
         # Check we aren't out of time
         if time.clock() - self.catchTime > self.TIME_LIMIT:
-            self.current_state = self.ALIGN_ANY
+            self.current_state = self.ALIGN_MID_FAR
 
         bottom_split = self.world.pitch.height/3
         top_split = bottom_split*2
@@ -117,7 +123,7 @@ class SimplePass(Strategy):
 
             displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
             return calculate_motor_speed(displacement, angle)
-
+####################################################################################################################
 
     def align_horiz(self):
         # aim horizontally
@@ -152,10 +158,29 @@ class SimplePass(Strategy):
         else:
             return action
 
+    def align_mid_far(self):            #aligns to middle of far away wall to do a bounce pass
+        x_aim = self.world.pitch.width/2
+        y_aim = 0
+
+        if (self.our_defender.y < self.world.pitch.height/2):
+            y_aim = self.world.pitch.height
+
+        angle = self.our_defender.get_rotation_to_point(x_aim, y_aim)
+        
+        action = calculate_motor_speed(None, angle, careful=True)
+
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
+            self.shootReadyTime = time.clock()
+            self.current_state = self.SHOOT
+            return do_nothing()
+        else:
+            return action
+
+
 
     def shoot(self):
         currentTime = time.clock()
-        if (currentTime - self.shootReadyTime) > 0.5:
+        if (currentTime - self.shootReadyTime) > 0.2:
             self.current_state = self.GET_BALL
             self.our_defender.catcher = 'open'
             return kick_ball(DEFAULT_KICK_POWER)
@@ -208,10 +233,13 @@ class SimpleBlock(Strategy):
 
         if predicted_y is None:
             predicted_y = self.ball.y
-            predicted_y = min(max(predicted_y, 80), self.world._pitch.height - 80)
+            predicted_y = min(max(predicted_y, 90), self.world._pitch.height - 90)
+
+        print "predicted YYYY", self.world.our_defender.y, predicted_y,self.world.our_goal.y, self.world.our_goal.width
+        print "*"*20
 
         displacement, angle = self.our_defender.get_direction_to_point(x_aim, predicted_y)
-        action = calculate_motor_speed(displacement, angle, backwards_ok=True)
+        action = calculate_motor_speed_defence(displacement, angle, backwards_ok=True)
 
         return action
 
@@ -857,4 +885,3 @@ class AttackerTurnScore(Strategy):
         sign = {1: 1, 2: -1}
         boundary_x = int(f(zone_poly, key=lambda z: z[0])[0]) + sign[zone]*self.offset
         return boundary_x
-
