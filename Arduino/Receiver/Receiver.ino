@@ -90,12 +90,13 @@ void kick() { //motor 3 not catcher, needs changed
       motorForward(CATCHER_MOTOR,100);
       delay(100);
       motorBackward(KICKER_MOTOR, power);
-      delay(130);
+      delay(115);
       motorStop(CATCHER_MOTOR);
-      delay(70);
+      delay(150);
       motorStop(KICKER_MOTOR);
-      motorForward(KICKER_MOTOR, power);
       delay(200);
+      motorForward(KICKER_MOTOR, power);
+      delay(230);
       motorStop(KICKER_MOTOR);
     }
   }
