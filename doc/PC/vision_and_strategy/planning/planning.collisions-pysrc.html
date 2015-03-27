@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>planning.collisions</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="planning-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="planning-module.html">Package&nbsp;planning</a> ::
+        Module&nbsp;collisions
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="planning.collisions-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="planning.collisions-module.html">Module planning.collisions</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">math</tt> <tt class="py-keyword">import</tt> <tt class="py-name">hypot</tt><tt class="py-op">,</tt> <tt class="py-name">atan2</tt><tt class="py-op">,</tt> <tt class="py-name">cos</tt><tt class="py-op">,</tt> <tt class="py-name">sin</tt> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"> </tt>
+<a name="get_boundary_path"></a><div id="get_boundary_path-def"><a name="L5"></a><tt class="py-lineno"> 5</tt> <a class="py-toggle" href="#" id="get_boundary_path-toggle" onclick="return toggle('get_boundary_path');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="planning.collisions-module.html#get_boundary_path">get_boundary_path</a><tt class="py-op">(</tt><tt class="py-param">robot</tt><tt class="py-op">,</tt> <tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">,</tt> <tt class="py-param">y</tt><tt class="py-op">,</tt> <tt class="py-param">displacement</tt><tt class="py-op">,</tt> <tt class="py-param">theta</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-param">zone</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="get_boundary_path-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="get_boundary_path-expanded"><a name="L6"></a><tt class="py-lineno"> 6</tt>  <tt class="py-line">    <tt class="py-comment"># Get closest point on path to zone boundary</tt> </tt>
+<a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line">    <tt class="py-keyword">while</tt> <tt class="py-keyword">not</tt> <tt id="link-0" class="py-name" targets="Variable planning.models.Goal.zone=planning.models.Goal-class.html#zone,Variable planning.models.Robot.zone=planning.models.Robot-class.html#zone"><a title="planning.models.Goal.zone
+planning.models.Robot.zone" class="py-name" href="#" onclick="return doclink('link-0', 'zone', 'link-0');">zone</a></tt><tt class="py-op">.</tt><tt class="py-name">isInside</tt><tt class="py-op">(</tt><tt id="link-1" class="py-name" targets="Variable planning.models.Coordinate.x=planning.models.Coordinate-class.html#x,Variable planning.models.PitchObject.x=planning.models.PitchObject-class.html#x"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-1', 'x', 'link-1');">x</a></tt><tt class="py-op">,</tt> <tt id="link-2" class="py-name" targets="Variable planning.models.Coordinate.y=planning.models.Coordinate-class.html#y,Variable planning.models.PitchObject.y=planning.models.PitchObject-class.html#y"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-2', 'y', 'link-2');">y</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line">        <tt class="py-name">plan_x</tt> <tt class="py-op">=</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-3" class="py-name"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-3', 'x', 'link-1');">x</a></tt> <tt class="py-op">+</tt> <tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">displacement</tt><tt class="py-op">-</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">cos</tt><tt class="py-op">(</tt><tt class="py-name">theta</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line">        <tt class="py-name">plan_y</tt> <tt class="py-op">=</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-4" class="py-name"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-4', 'y', 'link-2');">y</a></tt> <tt class="py-op">+</tt> <tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">displacement</tt><tt class="py-op">-</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">sin</tt><tt class="py-op">(</tt><tt class="py-name">theta</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line">        <tt id="link-5" class="py-name"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-5', 'x', 'link-1');">x</a></tt><tt class="py-op">,</tt> <tt id="link-6" class="py-name"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-6', 'y', 'link-2');">y</a></tt><tt class="py-op">,</tt> <tt class="py-name">displacement</tt> <tt class="py-op">=</tt> <tt class="py-name">plan_x</tt><tt class="py-op">,</tt> <tt class="py-name">plan_y</tt><tt class="py-op">,</tt> <tt class="py-name">displacement</tt><tt class="py-op">-</tt><tt class="py-number">1</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-7" class="py-name"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-7', 'x', 'link-1');">x</a></tt><tt class="py-op">,</tt> <tt id="link-8" class="py-name"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-8', 'y', 'link-2');">y</a></tt><tt class="py-op">,</tt> <tt class="py-name">displacement</tt><tt class="py-op">,</tt> <tt class="py-name">theta</tt> </tt>
+</div><a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"> </tt>
+<a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line"> </tt>
+<a name="get_path_to_point"></a><div id="get_path_to_point-def"><a name="L14"></a><tt class="py-lineno">14</tt> <a class="py-toggle" href="#" id="get_path_to_point-toggle" onclick="return toggle('get_path_to_point');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="planning.collisions-module.html#get_path_to_point">get_path_to_point</a><tt class="py-op">(</tt><tt class="py-param">robot</tt><tt class="py-op">,</tt> <tt class="py-param">x</tt><tt class="py-op">,</tt> <tt class="py-param">y</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="get_path_to_point-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="get_path_to_point-expanded"><a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line">    <tt class="py-comment"># Get path for robot to a point (x, y)</tt> </tt>
+<a name="L16"></a><tt class="py-lineno">16</tt>  <tt class="py-line">    <tt class="py-name">delta_x</tt> <tt class="py-op">=</tt> <tt id="link-9" class="py-name"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-9', 'x', 'link-1');">x</a></tt> <tt class="py-op">-</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-10" class="py-name"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-10', 'x', 'link-1');">x</a></tt> </tt>
+<a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line">    <tt class="py-name">delta_y</tt> <tt class="py-op">=</tt> <tt id="link-11" class="py-name"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-11', 'y', 'link-2');">y</a></tt> <tt class="py-op">-</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-12" class="py-name"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-12', 'y', 'link-2');">y</a></tt> </tt>
+<a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line">    <tt class="py-name">displacement</tt> <tt class="py-op">=</tt> <tt class="py-name">hypot</tt><tt class="py-op">(</tt><tt class="py-name">delta_x</tt><tt class="py-op">,</tt> <tt class="py-name">delta_y</tt><tt class="py-op">)</tt> </tt>
+<a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line">    <tt class="py-name">theta</tt> <tt class="py-op">=</tt> <tt class="py-name">atan2</tt><tt class="py-op">(</tt><tt class="py-name">delta_y</tt><tt class="py-op">,</tt> <tt class="py-name">delta_x</tt><tt class="py-op">)</tt> <tt class="py-op">-</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-13" class="py-name" targets="Variable planning.models.PitchObject.angle=planning.models.PitchObject-class.html#angle,Variable planning.models.Vector.angle=planning.models.Vector-class.html#angle"><a title="planning.models.PitchObject.angle
+planning.models.Vector.angle" class="py-name" href="#" onclick="return doclink('link-13', 'angle', 'link-13');">angle</a></tt> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-14" class="py-name"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-14', 'x', 'link-1');">x</a></tt><tt class="py-op">,</tt> <tt id="link-15" class="py-name"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-15', 'y', 'link-2');">y</a></tt><tt class="py-op">,</tt> <tt class="py-name">displacement</tt><tt class="py-op">,</tt> <tt class="py-name">theta</tt> </tt>
+</div><a name="L21"></a><tt class="py-lineno">21</tt>  <tt class="py-line"> </tt>
+<a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line"> </tt>
+<a name="get_interception"></a><div id="get_interception-def"><a name="L23"></a><tt class="py-lineno">23</tt> <a class="py-toggle" href="#" id="get_interception-toggle" onclick="return toggle('get_interception');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="planning.collisions-module.html#get_interception">get_interception</a><tt class="py-op">(</tt><tt class="py-param">path</tt><tt class="py-op">,</tt> <tt class="py-param">robot</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="get_interception-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="get_interception-expanded"><a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line">    <tt class="py-comment"># Get path necessary for robot to intercept ball</tt> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line">    <tt class="py-name">center_path</tt> <tt class="py-op">=</tt> <tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">center</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-16" class="py-name" targets="Function planning.collisions.get_path_to_point()=planning.collisions-module.html#get_path_to_point"><a title="planning.collisions.get_path_to_point" class="py-name" href="#" onclick="return doclink('link-16', 'get_path_to_point', 'link-16');">get_path_to_point</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt> <tt class="py-name">center_path</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-name">center_path</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L27"></a><tt class="py-lineno">27</tt>  <tt class="py-line"> </tt>
+<a name="L28"></a><tt class="py-lineno">28</tt>  <tt class="py-line"> </tt>
+<a name="get_avoidance"></a><div id="get_avoidance-def"><a name="L29"></a><tt class="py-lineno">29</tt> <a class="py-toggle" href="#" id="get_avoidance-toggle" onclick="return toggle('get_avoidance');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="planning.collisions-module.html#get_avoidance">get_avoidance</a><tt class="py-op">(</tt><tt class="py-param">path</tt><tt class="py-op">,</tt> <tt class="py-param">robot</tt><tt class="py-op">,</tt> <tt class="py-param">obstacle</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="get_avoidance-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="get_avoidance-expanded"><a name="L30"></a><tt class="py-lineno">30</tt>  <tt class="py-line">    <tt class="py-comment"># Get path necessary for robot to avoid obstacles when kicking the ball</tt> </tt>
+<a name="L31"></a><tt class="py-lineno">31</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">overlaps</tt><tt class="py-op">(</tt><tt class="py-name">obstacle</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L32"></a><tt class="py-lineno">32</tt>  <tt class="py-line">        <tt class="py-name">path_width_x</tt> <tt class="py-op">=</tt> <tt class="py-name">path</tt><tt class="py-op">[</tt><tt class="py-number">2</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-op">-</tt> <tt class="py-name">path</tt><tt class="py-op">[</tt><tt class="py-number">3</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> </tt>
+<a name="L33"></a><tt class="py-lineno">33</tt>  <tt class="py-line">        <tt class="py-name">path_width_y</tt> <tt class="py-op">=</tt> <tt class="py-name">path</tt><tt class="py-op">[</tt><tt class="py-number">2</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> <tt class="py-op">-</tt> <tt class="py-name">path</tt><tt class="py-op">[</tt><tt class="py-number">3</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> </tt>
+<a name="L34"></a><tt class="py-lineno">34</tt>  <tt class="py-line">        <tt class="py-name">path_width</tt> <tt class="py-op">=</tt> <tt class="py-name">hypot</tt><tt class="py-op">(</tt><tt class="py-name">path_width_x</tt><tt class="py-op">,</tt> <tt class="py-name">path_width_y</tt><tt class="py-op">)</tt> </tt>
+<a name="L35"></a><tt class="py-lineno">35</tt>  <tt class="py-line">        <tt class="py-name">robot_width</tt> <tt class="py-op">=</tt> <tt class="py-name">obstacle</tt><tt class="py-op">.</tt><tt class="py-name">get_dimensions</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> </tt>
+<a name="L36"></a><tt class="py-lineno">36</tt>  <tt class="py-line">        <tt class="py-name">min_distance</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">path_width</tt> <tt class="py-op">*</tt> <tt class="py-number">0.5</tt><tt class="py-op">)</tt> <tt class="py-op">+</tt> <tt class="py-op">(</tt><tt class="py-name">robot_width</tt> <tt class="py-op">*</tt> <tt class="py-number">0.5</tt><tt class="py-op">)</tt> </tt>
+<a name="L37"></a><tt class="py-lineno">37</tt>  <tt class="py-line">        <tt class="py-name">center_path</tt> <tt class="py-op">=</tt> <tt class="py-name">path</tt><tt class="py-op">.</tt><tt class="py-name">center</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L38"></a><tt class="py-lineno">38</tt>  <tt class="py-line">        <tt class="py-name">delta_x</tt> <tt class="py-op">=</tt> <tt class="py-name">center_path</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-op">-</tt> <tt class="py-name">obstacle</tt><tt class="py-op">.</tt><tt id="link-17" class="py-name"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-17', 'x', 'link-1');">x</a></tt> </tt>
+<a name="L39"></a><tt class="py-lineno">39</tt>  <tt class="py-line">        <tt class="py-name">delta_y</tt> <tt class="py-op">=</tt> <tt class="py-name">center_path</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> <tt class="py-op">-</tt> <tt class="py-name">obstacle</tt><tt class="py-op">.</tt><tt id="link-18" class="py-name"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-18', 'y', 'link-2');">y</a></tt> </tt>
+<a name="L40"></a><tt class="py-lineno">40</tt>  <tt class="py-line">        <tt class="py-name">displacement</tt> <tt class="py-op">=</tt> <tt class="py-name">hypot</tt><tt class="py-op">(</tt><tt class="py-name">delta_x</tt><tt class="py-op">,</tt> <tt class="py-name">delta_y</tt><tt class="py-op">)</tt> </tt>
+<a name="L41"></a><tt class="py-lineno">41</tt>  <tt class="py-line">        <tt class="py-name">path_distance</tt> <tt class="py-op">=</tt> <tt class="py-name">min_distance</tt> <tt class="py-op">-</tt> <tt class="py-name">displacement</tt> </tt>
+<a name="L42"></a><tt class="py-lineno">42</tt>  <tt class="py-line">        <tt class="py-name">theta</tt> <tt class="py-op">=</tt> <tt class="py-name">atan2</tt><tt class="py-op">(</tt><tt class="py-name">delta_y</tt><tt class="py-op">,</tt> <tt class="py-name">delta_x</tt><tt class="py-op">)</tt> </tt>
+<a name="L43"></a><tt class="py-lineno">43</tt>  <tt class="py-line">        <tt class="py-name">path_x</tt> <tt class="py-op">=</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-19" class="py-name"><a title="planning.models.Coordinate.x
+planning.models.PitchObject.x" class="py-name" href="#" onclick="return doclink('link-19', 'x', 'link-1');">x</a></tt> <tt class="py-op">+</tt> <tt class="py-op">(</tt><tt class="py-name">path_distance</tt> <tt class="py-op">*</tt> <tt class="py-name">cos</tt><tt class="py-op">(</tt><tt class="py-name">theta</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line">        <tt class="py-name">path_y</tt> <tt class="py-op">=</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-20" class="py-name"><a title="planning.models.Coordinate.y
+planning.models.PitchObject.y" class="py-name" href="#" onclick="return doclink('link-20', 'y', 'link-2');">y</a></tt> <tt class="py-op">+</tt> <tt class="py-op">(</tt><tt class="py-name">path_distance</tt> <tt class="py-op">*</tt> <tt class="py-name">sin</tt><tt class="py-op">(</tt><tt class="py-name">theta</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L45"></a><tt class="py-lineno">45</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-21" class="py-name"><a title="planning.collisions.get_path_to_point" class="py-name" href="#" onclick="return doclink('link-21', 'get_path_to_point', 'link-16');">get_path_to_point</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt> <tt class="py-name">path_x</tt><tt class="py-op">,</tt> <tt class="py-name">path_y</tt><tt class="py-op">)</tt> </tt>
+<a name="L46"></a><tt class="py-lineno">46</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L47"></a><tt class="py-lineno">47</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">None</tt> </tt>
+</div><a name="L48"></a><tt class="py-lineno">48</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="planning-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Fri Mar 27 05:15:35 2015
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

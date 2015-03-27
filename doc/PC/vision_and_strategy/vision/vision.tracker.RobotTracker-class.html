@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>vision.tracker.RobotTracker</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="vision-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="vision-module.html">Package&nbsp;vision</a> ::
+        <a href="vision.tracker-module.html">Module&nbsp;tracker</a> ::
+        Class&nbsp;RobotTracker
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="vision.tracker.RobotTracker-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class RobotTracker</h1><p class="nomargin-top"><span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+    
+         |    
+   <a href="vision.tracker.Tracker-class.html">Tracker</a> --+
+             |
+            <strong class="uidshort">RobotTracker</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="vision.tracker.RobotTracker-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">color</span>,
+        <span class="summary-sig-arg">crop</span>,
+        <span class="summary-sig-arg">offset</span>,
+        <span class="summary-sig-arg">pitch</span>,
+        <span class="summary-sig-arg">name</span>,
+        <span class="summary-sig-arg">calibration</span>)</span><br />
+      Initialize tracker.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="vision.tracker.RobotTracker-class.html#get_plate" class="summary-sig-name">get_plate</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">frame</span>)</span><br />
+      Given the frame to search, find a bounding rectangle for the green plate</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.get_plate">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="vision.tracker.RobotTracker-class.html#get_dot" class="summary-sig-name">get_dot</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">frame</span>,
+        <span class="summary-sig-arg">x_offset</span>,
+        <span class="summary-sig-arg">y_offset</span>,
+        <span class="summary-sig-arg">plate_corners</span>,
+        <span class="summary-sig-arg">angle</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Find center point of the black dot on the plate.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.get_dot">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="vision.tracker.RobotTracker-class.html#find" class="summary-sig-name">find</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">frame</span>,
+        <span class="summary-sig-arg">queue</span>)</span><br />
+      Retrieve coordinates for the robot, it's orientation and speed - if
+available.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.find">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="kmeans"></a><span class="summary-sig-name">kmeans</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">plate</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.kmeans">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code><a href="vision.tracker.Tracker-class.html">Tracker</a></code></b>:
+      <code><a href="vision.tracker.Tracker-class.html#get_angle">get_angle</a></code>,
+      <code><a href="vision.tracker.Tracker-class.html#get_bounding_box">get_bounding_box</a></code>,
+      <code><a href="vision.tracker.Tracker-class.html#get_contour_centre">get_contour_centre</a></code>,
+      <code><a href="vision.tracker.Tracker-class.html#get_contour_corners">get_contour_corners</a></code>,
+      <code><a href="vision.tracker.Tracker-class.html#get_contour_extremes">get_contour_extremes</a></code>,
+      <code><a href="vision.tracker.Tracker-class.html#get_contours">get_contours</a></code>,
+      <code><a href="vision.tracker.Tracker-class.html#get_largest_contour">get_largest_contour</a></code>,
+      <code><a href="vision.tracker.Tracker-class.html#join_contours">join_contours</a></code>,
+      <code><a href="vision.tracker.Tracker-class.html#preprocess">preprocess</a></code>
+      </p>
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">color</span>,
+        <span class="sig-arg">crop</span>,
+        <span class="sig-arg">offset</span>,
+        <span class="sig-arg">pitch</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">calibration</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Initialize tracker.
+
+Params:
+    [string] color      the name of the color to pass in
+    [(left-min, right-max, top-min, bot-max)]
+                        crop  crop coordinates
+    [int]       offset          how much to offset the coordinates
+    [int]       pitch           the pitch we're tracking - used to find the right colors
+    [string]    name            name for debug purposes
+    [dict]      calibration     dictionary of calibration values
+
+</pre>
+  <dl class="fields">
+    <dt>Overrides:
+        object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_plate"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_plate</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">frame</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.get_plate">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Given the frame to search, find a bounding rectangle for the green plate
+
+Returns:
+    list of corner points
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_dot"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_dot</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">frame</span>,
+        <span class="sig-arg">x_offset</span>,
+        <span class="sig-arg">y_offset</span>,
+        <span class="sig-arg">plate_corners</span>,
+        <span class="sig-arg">angle</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.get_dot">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+ Find center point of the black dot on the plate.
+
+ Method:
+     1. Assume that the dot is within some proximity of the center of the plate.
+     2. Fill a dummy frame with black and draw white cirlce around to create a mask.
+     3. Mask against the frame to eliminate any robot parts looking like dark dots.
+     4. Use contours to detect the dot and return it's center.
+
+Params:
+     frame         The frame to search
+     x_offset      The offset from the uncropped image - to be added to the final values
+     y_offset      The offset from the uncropped image - to be added to the final values
+     plate_corners The corners of the plate detected
+ 
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="find"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">find</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">frame</span>,
+        <span class="sig-arg">queue</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="vision.tracker-pysrc.html#RobotTracker.find">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Retrieve coordinates for the robot, it's orientation and speed - if
+available.
+
+Process:
+    1. Find green plate
+    2. Create a smaller frame with just the plate
+    3. Find dot inside the green plate (the smaller window)
+    4. Use plate corner points from (1) to determine angle
+
+Params:
+    [np.array] frame                - the frame to scan
+    [multiprocessing.Queue] queue   - shared resource for process
+
+Returns:
+    None. Result is put into the queue.
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="vision-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Fri Mar 27 05:00:17 2015
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
