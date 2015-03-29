@@ -37,9 +37,9 @@ class Strategy(object):
 class SimplePass(Strategy):
     # For controlling _defender_
 
-    PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, SHOOT = \
-        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_MID_FAR', 'SHOOT'
-    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, SHOOT]
+    PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, SHOOT, WAIT = \
+        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_MID_FAR', 'SHOOT', 'WAIT'
+    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, SHOOT, WAIT]
 
     def __init__(self, world):
         super(SimplePass, self).__init__(world, self.STATES)
@@ -50,13 +50,13 @@ class SimplePass(Strategy):
             self.AVOID: self.avoid,
             self.ALIGN_HORIZ: self.align_horiz,
             self.ALIGN_MID_FAR: self.align_mid_far,
-            self.SHOOT: self.shoot
+            self.SHOOT: self.shoot,
+            self.WAIT: self.wait
         }
 
         self.catchTime = -1
 
-        self.TIME_LIMIT = 9
-        # self.TIME_LIMIT = 2
+        self.TIME_LIMIT = 8
 
         self.SPACE_THRESHOLD = 60
 
@@ -81,7 +81,8 @@ class SimplePass(Strategy):
             self.our_defender.catcher = 'closed'
             return grab_ball()
         else:
-            if (displacement > 25):
+            if (displacement > 40):
+                print "sfsdfh"
                 return calculate_motor_speed(displacement, angle, careful=True)
             else:
                 return calculate_motor_speed_for_catch(displacement, angle, careful=True)
@@ -91,6 +92,7 @@ class SimplePass(Strategy):
         # Check we aren't out of time
         if time.clock() - self.catchTime > self.TIME_LIMIT:
             self.current_state = self.ALIGN_MID_FAR
+            return do_nothing()
 
         bottom_split = self.world.pitch.height/3
         top_split = bottom_split*2
@@ -132,7 +134,7 @@ class SimplePass(Strategy):
         if action['left_motor'] == 0 and action['right_motor'] == 0:
             self.shootReadyTime = time.clock()
             self.current_state = self.SHOOT
-            return do_nothing()
+            return action
         else:
             return action
 
@@ -150,7 +152,7 @@ class SimplePass(Strategy):
         if action['left_motor'] == 0 and action['right_motor'] == 0:
             self.shootReadyTime = time.clock()
             self.current_state = self.SHOOT
-            return do_nothing()
+            return action
         else:
             return action
 
@@ -159,11 +161,18 @@ class SimplePass(Strategy):
     def shoot(self):
         currentTime = time.clock()
         if (currentTime - self.shootReadyTime) > 0.2:
-            self.current_state = self.GET_BALL
+            self.current_state = self.WAIT
+            self.shootTime = currentTime
             self.our_defender.catcher = 'open'
             return kick_ball(DEFAULT_KICK_POWER)
         else:
             return do_nothing()
+
+    def wait(self):
+        currentTime = time.clock()
+        if (currentTime - self.shootTime) > 0.2:
+            self.current_state = self.GET_BALL
+        return do_nothing()
 
 
 class SimpleBlock(Strategy):

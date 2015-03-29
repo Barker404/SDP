@@ -304,7 +304,7 @@ def calculate_motor_speed_for_catch(displacement, angle, backwards_ok=False, car
         #         return {'left_motor': turnSpeedLow, 'right_motor': turnSpeedHigh}
         #     else:
         #         return {'left_motor': turnSpeedHigh, 'right_motor': turnSpeedLow}
-        if abs(angle) > CURVE_THRESHOLD:
+        if abs(angle) > threshold:
             if careful:
                 turnSpeed = TURNING_SPEED_SUPER_CAREFUL * multiplier
             else:
