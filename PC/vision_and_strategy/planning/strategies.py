@@ -81,7 +81,6 @@ class SimplePass(Strategy):
             self.our_defender.catcher = 'closed'
             return grab_ball()
         else:
-            print displacement
             if (displacement > 25):
                 return calculate_motor_speed(displacement, angle, careful=True)
             else:
@@ -235,9 +234,6 @@ class SimpleBlock(Strategy):
             predicted_y = self.ball.y
             predicted_y = min(max(predicted_y, 90), self.world._pitch.height - 90)
 
-        print "predicted YYYY", self.world.our_defender.y, predicted_y,self.world.our_goal.y, self.world.our_goal.width
-        print "*"*20
-
         displacement, angle = self.our_defender.get_direction_to_point(x_aim, predicted_y)
         action = calculate_motor_speed_defence(displacement, angle, backwards_ok=True)
 
@@ -357,11 +353,7 @@ class Milestone2Defender(Strategy):
         if predicted_y is None:
             predicted_y = self.ball.y
 
-        print predicted_y
-
         displacement, angle = self.our_defender.get_direction_to_point(self.our_defender.x + 30, predicted_y)
-
-        print angle
 
         action = calculate_motor_speed(None, angle)
 
@@ -395,7 +387,6 @@ class Milestone2Defender(Strategy):
         if self.ball.velocity > BALL_VELOCITY:
             predicted_y = predict_y_intersection(self.world, x_aim, self.ball, bounce=False)
 
-        print predicted_y
         if predicted_y is not None:
             displacement, angle = self.our_defender.get_direction_to_point(x_aim,
                                                                            predicted_y - 7*math.sin(self.our_defender.angle))

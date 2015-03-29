@@ -231,7 +231,7 @@ class Arduino:
             self.increment_command+=1;
             if self.last_command != string or self.increment_command > 5:
                 self.increment_command=0;
-                # print string
+                print string
                 self.last_command = string
                 self.serial.write(string)
 
