@@ -126,9 +126,17 @@ class SimplePass(Strategy):
 
     def align_horiz(self):
         # aim horizontally
-        angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
-        
+
+		#check if direct pass to attcker can be made
+
+        if ( True ): #True for testing # passes upfield in the horizontal space we have made
+		    angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
+
+        else:
+            angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
+
         action = calculate_motor_speed(None, angle, careful=True)
+
         if action['left_motor'] == 0 and action['right_motor'] == 0:
             self.shootReadyTime = time.clock()
             self.current_state = self.SHOOT
