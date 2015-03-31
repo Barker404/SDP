@@ -37,7 +37,7 @@ class Tracker(object):
 
             # Create a mask
             frame_mask = cv2.inRange(frame_hsv, adjustments['min'], adjustments['max'])
-
+            frame_mask = cv2.morphologyEx(frame_mask, cv2.MORPH_OPEN, np.ones((2,2), np.uint8))
             # Apply threshold to the masked image, no idea what the values mean
             return_val, threshold = cv2.threshold(frame_mask, 127, 255, 0)
 
@@ -72,7 +72,7 @@ class Tracker(object):
 
         # Create a mask
         frame_mask = cv2.inRange(frame_hsv, min_color, max_color)
-
+        frame_mask = cv2.morphologyEx(frame_mask, cv2.MORPH_OPEN, np.ones((2,2), np.uint8))
         kernel = np.ones((5, 5), np.uint8)
         erosion = cv2.erode(frame_mask, kernel, iterations=1)
 
@@ -433,6 +433,68 @@ class BallTracker(Tracker):
         # else:
         #     self.color = PITCH1['red']
         self.color = [calibration['red']]
+        self.offset = offset
+        self.name = name
+        self.calibration = calibration
+
+    def find(self, frame, queue):
+
+        for color in self.color:
+            contours, hierarchy, mask = self.preprocess(
+                frame,
+                self.crop,
+                color['min'],
+                color['max'],
+                color['contrast'],
+                color['blur']
+            )
+
+            if len(contours) <= 0:
+                # print 'No ball found.'
+                pass
+                # queue.put(None)
+            else:
+                # Trim contours matrix
+                cnt = self.get_largest_contour(contours)
+
+                # Get center
+                (x, y), radius = cv2.minEnclosingCircle(cnt)
+
+                queue.put({
+                    'name': self.name,
+                    'x': x,
+                    'y': y,
+                    'angle': None,
+                    'velocity': None
+                })
+                return
+
+        queue.put(None)
+        return
+
+class LineTracker(Tracker):
+    """
+    Track white lines on the pitch.
+    """
+
+    def __init__(self, crop, offset, pitch, calibration, name='lines'):
+        """
+        Initialize tracker.
+
+        Using yellow calibration channel to track white lines, as yellow is not used
+
+        Params:
+            [string] color      the name of the color to pass in
+            [(left-min, right-max, top-min, bot-max)]
+                                crop  crop coordinates
+            [int] offset        how much to offset the coordinates
+        """
+        self.crop = crop
+        # if pitch == 0:
+        #     self.color = PITCH0['red']
+        # else:
+        #     self.color = PITCH1['red']
+        self.color = [calibration['yellow']]
         self.offset = offset
         self.name = name
         self.calibration = calibration

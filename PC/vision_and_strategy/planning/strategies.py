@@ -2,6 +2,7 @@ from utilities import *
 import math
 from random import randint
 import time
+from Polygon.cPolygon import Polygon
 
 DEFAULT_KICK_POWER = 70
 
@@ -37,9 +38,9 @@ class Strategy(object):
 class SimplePass(Strategy):
     # For controlling _defender_
 
-    PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, SHOOT, WAIT = \
-        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_MID_FAR', 'SHOOT', 'WAIT'
-    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, SHOOT, WAIT]
+    PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, ALIGN_STRAIGHT, SHOOT, WAIT = \
+        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_MID_FAR', 'ALIGN_STRAIGHT', 'SHOOT', 'WAIT'
+    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, ALIGN_STRAIGHT, SHOOT, WAIT]
 
     def __init__(self, world):
         super(SimplePass, self).__init__(world, self.STATES)
@@ -50,6 +51,7 @@ class SimplePass(Strategy):
             self.AVOID: self.avoid,
             self.ALIGN_HORIZ: self.align_horiz,
             self.ALIGN_MID_FAR: self.align_mid_far,
+            self.ALIGN_STRAIGHT: self.align_straight,
             self.SHOOT: self.shoot,
             self.WAIT: self.wait
         }
@@ -74,6 +76,12 @@ class SimplePass(Strategy):
             return do_nothing()
 
     def get_ball(self):
+
+        path = self.world.our_defender.get_pass_path(self.world.our_attacker)
+        BLOCKED = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
+        print BLOCKED;
+
+
         displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
         if self.our_defender.can_catch_ball(self.ball):
             self.current_state = self.AVOID
@@ -100,8 +108,16 @@ class SimplePass(Strategy):
 
 
         if abs(self.their_attacker.y - self.our_defender.y) > self.SPACE_THRESHOLD:
-            # Safe to shoot
-            self.current_state = self.ALIGN_HORIZ
+            
+            path = self.world.our_defender.get_pass_path(self.world.our_attacker)
+            BLOCKED = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
+
+            print BLOCKED;
+
+            if(BLOCKED):
+                self.current_state = self.ALIGN_STRAIGHT
+            else:
+                self.current_state = self.ALIGN_HORIZ
             return do_nothing()
         else:
             if self.their_attacker.y < bottom_split:
@@ -128,9 +144,11 @@ class SimplePass(Strategy):
 
     def align_horiz(self):
         # aim horizontally
-        angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
-        
+       
+        angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
+
         action = calculate_motor_speed(None, angle, careful=True)
+
         if action['left_motor'] == 0 and action['right_motor'] == 0:
             self.shootReadyTime = time.clock()
             self.current_state = self.SHOOT
@@ -156,7 +174,18 @@ class SimplePass(Strategy):
         else:
             return action
 
+    def align_straight(self):       # aligns perpendicular because path is blocked
 
+        angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
+
+        action = calculate_motor_speed(None, angle, careful=True)
+
+        if action['left_motor'] == 0 and action['right_motor'] == 0:
+            self.shootReadyTime = time.clock()
+            self.current_state = self.SHOOT
+            return do_nothing()
+        else:
+            return action
 
     def shoot(self):
         currentTime = time.clock()
