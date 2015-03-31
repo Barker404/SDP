@@ -37,7 +37,7 @@ class Tracker(object):
 
             # Create a mask
             frame_mask = cv2.inRange(frame_hsv, adjustments['min'], adjustments['max'])
-
+            frame_mask = cv2.morphologyEx(frame_mask, cv2.MORPH_OPEN, np.ones((2,2), np.uint8))
             # Apply threshold to the masked image, no idea what the values mean
             return_val, threshold = cv2.threshold(frame_mask, 127, 255, 0)
 
@@ -72,7 +72,7 @@ class Tracker(object):
 
         # Create a mask
         frame_mask = cv2.inRange(frame_hsv, min_color, max_color)
-
+        frame_mask = cv2.morphologyEx(frame_mask, cv2.MORPH_OPEN, np.ones((2,2), np.uint8))
         kernel = np.ones((5, 5), np.uint8)
         erosion = cv2.erode(frame_mask, kernel, iterations=1)
 

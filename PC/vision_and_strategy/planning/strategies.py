@@ -2,6 +2,7 @@ from utilities import *
 import math
 from random import randint
 import time
+from Polygon.cPolygon import Polygon
 
 DEFAULT_KICK_POWER = 70
 
@@ -75,6 +76,12 @@ class SimplePass(Strategy):
             return do_nothing()
 
     def get_ball(self):
+
+        path = self.world.our_defender.get_pass_path(self.world.our_attacker)
+        BLOCKED = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
+        print BLOCKED;
+
+
         displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
         if self.our_defender.can_catch_ball(self.ball):
             self.current_state = self.AVOID
@@ -101,7 +108,9 @@ class SimplePass(Strategy):
         if abs(self.their_attacker.y - self.our_defender.y) > self.SPACE_THRESHOLD:
             
             path = self.world.our_defender.get_pass_path(self.world.our_attacker)
-            BLOCKED = path.overlap(self.world.their_attacker.get_polygon())
+            BLOCKED = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
+
+            print BLOCKED;
 
             if(BLOCKED):
                 self.current_state = self.ALIGN_STRAIGHT
