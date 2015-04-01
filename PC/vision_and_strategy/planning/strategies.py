@@ -142,7 +142,7 @@ class SimplePass(Strategy):
             elif self.their_attacker.y < midpoint:
                 # Bottom blocked
                 pointY = self.world.pitch.height
-            elif self.their_attacker.y > top_split:
+            else:
                 # Top blocked
                 pointY = 0
 
