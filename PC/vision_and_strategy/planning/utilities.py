@@ -124,7 +124,7 @@ def kick_ball(power):
 def open_catcher():
     return {'drop': 1}
 
-# LB: Not currently supported by arduino
+# Not currently supported by arduino
 def turn_shoot(orientation):
     return {'turn_90': orientation, 'left_motor': 0, 'right_motor': 0, 'kicker': 1, 'catcher': 0, 'speed': 1000}
 
@@ -145,8 +145,8 @@ def calculate_motor_speed_defence(displacement, angle, backwards_ok=False, caref
     Complicated view of calculating the speed for defence
     '''
 
-    # LB: potentially calculate careful turning speed based on angle
-    # - Slow down as we get closer
+    # Could potentially calculate careful turning speed based on angle
+    # and slow down as we get closer
     if careful:
         threshold = BALL_ANGLE_THRESHOLD
     else:
@@ -210,8 +210,8 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
     Simplistic view of calculating the speed
     '''
 
-    # LB: potentially calculate careful turning speed based on angle
-    # - Slow down as we get closer
+    # Could potentially calculate careful turning speed based on angle
+    # and slow down as we get closer
     if careful:
         threshold = BALL_ANGLE_THRESHOLD
     else:
@@ -275,8 +275,8 @@ def calculate_motor_speed_for_catch(displacement, angle, backwards_ok=False, car
     calculate moving for catching the ball
     '''
 
-    # LB: potentially calculate careful turning speed based on angle
-    # - Slow down as we get closer
+    # Could potentially calculate careful turning speed based on angle
+    # and slow down as we get closer
     if careful:
         threshold = BALL_ANGLE_THRESHOLD
     else:

@@ -19,6 +19,8 @@ GOAL_HEIGHT = 10
 
 CATCHING_DISP_THRESHOLD = 0
 
+CATCHER_AREA = {'width' : 25, 'height' : 27, 'front_offset' : 12}
+
 class Coordinate(object):
 
     def __init__(self, x, y):
@@ -185,6 +187,7 @@ class Robot(PitchObject):
         super(Robot, self).__init__(x, y, angle, velocity, width, length, height, angle_offset)
         self._zone = zone
         self._catcher = 'open'
+        self.catcher_area = CATCHER_AREA
 
     @property
     def zone(self):

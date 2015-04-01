@@ -21,29 +21,11 @@ class Planner:
 
     def __init__(self, our_side, pitch_num, isPenalty=False):
         self._world = World(our_side, pitch_num)
-        # LB: Magic numbers!
-        # These should surely be constants in models.py?
-        # Also need to make sure grabber area is consistent with our robot
-        self._world.our_defender.catcher_area = {'width' : 25, 'height' : 27, 'front_offset' : 12} #10
-        self._world.our_attacker.catcher_area = {'width' : 25, 'height' : 27, 'front_offset' : 14}
 
-        self._attacker_strategies = { 'pass'   : [SimplePass],
-                                      'defend' : [SimpleBlock]}
         self._defender_strategies = { 'pass'   : [SimplePass],
                                       'defend' : [SimpleBlock],
                                       'penalty' : [DefenderPenalty]
                                       }
-
-        # self._attacker_strategies = {'defence' : [AttackerDefend],
-        #                              'grab' : [AttackerGrab, AttackerGrabCareful],
-        #                              'score' : [AttackerDriveByTurn, AttackerDriveBy, AttackerTurnScore, AttackerScoreDynamic],
-        #                              'catch' : [AttackerPositionCatch, AttackerCatch]}
-
-        # self._defender_strategies = {'defence' : [DefenderDefence, DefenderPenalty],
-        #                              'grab' : [DefenderGrab],
-        #                              'pass' : [DefenderBouncePass]}
-
-        self._attacker_state = 'defend'
         
         if isPenalty:
             self._defender_state = 'penalty'
@@ -54,35 +36,15 @@ class Planner:
 
 
         self._defender_current_strategy = self.choose_defender_strategy(self._world)
-        self._attacker_current_strategy = self.choose_attacker_strategy(self._world)
 
-    # LB: Only chooses the first possible strategy? Is this correct?
-    # Provisional. Choose the first strategy in the applicable list.
-    def choose_attacker_strategy(self, world):
-        next_strategy = self._attacker_strategies[self._attacker_state][0]
-        return next_strategy(world)
-
-    # Provisional. Choose the first strategy in the applicable list.
+    # Choose the first strategy in the applicable list.
     def choose_defender_strategy(self, world):
         next_strategy = self._defender_strategies[self._defender_state][0]
         return next_strategy(world)
 
     @property
-    def attacker_strat_state(self):
-        return self._attacker_current_strategy.current_state
-
-    @property
     def defender_strat_state(self):
         return self._defender_current_strategy.current_state
-
-    @property
-    def attacker_state(self):
-        return self._attacker_state
-
-    @attacker_state.setter
-    def attacker_state(self, new_state):
-        assert new_state in ['defend', 'pass', 'penalty']
-        self._attacker_state = new_state
 
     @property
     def defender_state(self):
@@ -96,9 +58,6 @@ class Planner:
     def update_world(self, position_dictionary):
         self._world.update_positions(position_dictionary)
 
-    # LB: We could split up this big method
-    # I also don't think robot should have a default - to avoid forgetting the parameter
-    # But we need to check if it is used anywhere without the parameter
     def plan(self, robot='attacker'):
         assert robot == 'defender'
 

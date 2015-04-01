@@ -90,12 +90,10 @@ class SimplePass(Strategy):
             return grab_ball()
         else:
             if (displacement > 40):
-                print "sfsdfh"
                 return calculate_motor_speed(displacement, angle, careful=True)
             else:
                 return calculate_motor_speed_for_catch(displacement, angle, careful=True)
 
-####################################################################################################################
     def avoid(self):
         # Check we aren't out of time
         if time.clock() - self.catchTime > self.TIME_LIMIT:
@@ -140,7 +138,6 @@ class SimplePass(Strategy):
 
             displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
             return calculate_motor_speed(displacement, angle)
-####################################################################################################################
 
     def align_horiz(self):
         # aim horizontally
@@ -156,7 +153,8 @@ class SimplePass(Strategy):
         else:
             return action
 
-    def align_mid_far(self):            #aligns to middle of far away wall to do a bounce pass
+    def align_mid_far(self):
+        # aligns to middle of far away wall to do a bounce pass
         x_aim = self.world.pitch.width/2
         y_aim = 0
 
@@ -174,7 +172,8 @@ class SimplePass(Strategy):
         else:
             return action
 
-    def align_straight(self):       # aligns perpendicular because path is blocked
+    def align_straight(self):
+        # aligns perpendicular because path is blocked
 
         angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
 

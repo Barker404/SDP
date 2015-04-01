@@ -66,9 +66,7 @@ class Controller:
 
         self.robot = Robot_Controller()
 
-    # LB: This looks important, name should probably change
-    # Seems to be the main loop
-    def wow(self):
+    def loop(self):
         """
         Ready your sword, here be dragons.
         """
@@ -79,7 +77,6 @@ class Controller:
             while c != 27:  # the ESC key
 
                 ### Vision ###
-
                 frame = self.camera.get_frame()
                 pre_options = self.preprocessing.options
                 # Apply preprocessing methods toggled in the UI
@@ -96,8 +93,6 @@ class Controller:
                 ### Planning ###
 
                 self.planner.update_world(model_positions)
-                attacker_actions = None
-                attacker_state = None
 
                 defender_actions = self.planner.plan('defender')
 
@@ -110,12 +105,10 @@ class Controller:
 
                 # Use 'y', 'b', 'r' to change color.
                 c = waitKey(2) & 0xFF
-                # LB: why are we making this empty here? It passes to the GUI, should we not keep track of the actions?
                 actions = []
                 fps = float(counter) / (time.clock() - timer)
 
                 # Information about the grabbers from the world
-                # LB: Does this need to be defined here? Can we not send them (to the gui) directly?
                 grabbers = {
                     'our_defender': self.planner._world.our_defender.catcher_area,
                     'our_attacker': self.planner._world.our_attacker.catcher_area
@@ -123,10 +116,9 @@ class Controller:
 
                 # Draw vision content and actions
                 self.GUI.draw(
-                    frame, model_positions, actions, regular_positions, fps, attacker_state,
-                    defender_state, attacker_actions, defender_actions, grabbers,
+                    frame, model_positions, regular_positions, fps, None,
+                    defender_state, None, defender_actions, grabbers,
                     our_color=self.color, our_side=self.side, key=c, preprocess=pre_options)
-                # print "can catch: " + str(self.planner._world.our_defender.can_catch_ball(self.planner._world.ball))
                 counter += 1
 
         except:
@@ -171,10 +163,6 @@ class Robot_Controller(object):
                     right_motor = int(action['right_motor'])
                 msg = '\rRUN_ENG %d %d\r' % (max(min(left_motor, 99), -99), max(min(right_motor, 99), -99))
                 comm.write(msg)
-
-            if 'speed' in action:
-                # LB: need to decide whether to use this or not
-                speed = action['speed']
 
             if 'kicker' in action and action['kicker'] != 0:
                 try:
@@ -255,4 +243,4 @@ if __name__ == '__main__':
         comms = 1
 
     c = Controller(
-        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms, penalty=args.penalty).wow()
+        pitch=int(args.pitch), color=args.color, our_side=args.side, comms=comms, penalty=args.penalty).loop()
