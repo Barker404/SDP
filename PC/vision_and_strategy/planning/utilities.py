@@ -5,7 +5,6 @@ DISTANCE_MATCH_THRESHOLD = 15
 ANGLE_MATCH_THRESHOLD = pi/10
 BALL_ANGLE_THRESHOLD = pi/20
 CURVE_THRESHOLD = pi/5
-CURVE_THRESHOLD = pi/3
 CURVE_SPEED_DIFF = 10
 
 FORWARD_SPEED = 80
@@ -158,6 +157,7 @@ def calculate_motor_speed_defence(displacement, angle, backwards_ok=False, caref
         multiplier = 1
 
         # Check if we can get there with less turning by going backwards
+        moving_backwards = False
         if backwards_ok and abs(angle) > pi/2:
             moving_backwards = True
             if angle > 0:
@@ -223,6 +223,7 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
         multiplier = 1
 
         # Check if we can get there with less turning by going backwards
+        moving_backwards = False
         if backwards_ok and abs(angle) > pi/2:
             moving_backwards = True
             if angle > 0:
@@ -236,10 +237,18 @@ def calculate_motor_speed(displacement, angle, backwards_ok=False, careful=False
             # Move forward curving
             turnSpeedHigh = min(100, TURNING_SPEED_CAREFUL + CURVE_SPEED_DIFF)
             turnSpeedLow = max(0, TURNING_SPEED_CAREFUL - CURVE_SPEED_DIFF)           
-            if angle <= 0:
-                return {'left_motor': turnSpeedLow, 'right_motor': turnSpeedHigh}
+            if moving_backwards:
+                # Backwards arc
+                if angle <= 0:
+                    return {'left_motor': -turnSpeedHigh, 'right_motor': -turnSpeedLow}
+                else:
+                    return {'left_motor': -turnSpeedLow, 'right_motor': -turnSpeedHigh}
             else:
-                return {'left_motor': turnSpeedHigh, 'right_motor': turnSpeedLow}
+                # Forwards arc
+                if angle <= 0:
+                    return {'left_motor': turnSpeedLow, 'right_motor': turnSpeedHigh}
+                else:
+                    return {'left_motor': turnSpeedHigh, 'right_motor': turnSpeedLow}
         elif abs(angle) > threshold:
             if careful:
                 turnSpeed = TURNING_SPEED_CAREFUL * multiplier

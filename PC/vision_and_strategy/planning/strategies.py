@@ -293,7 +293,7 @@ class SimpleBlock(Strategy):
             self.max_x = 90
         else:
             self.min_x = 450
-            self.max_x = 470
+            self.max_x = 480
 
         self.our_attacker = self.world.our_attacker
         self.their_attacker = self.world.their_attacker
@@ -322,7 +322,7 @@ class SimpleBlock(Strategy):
             predicted_y = min(max(predicted_y, 90), self.world._pitch.height - 90)
 
         displacement, angle = self.our_defender.get_direction_to_point(x_aim, predicted_y)
-        action = calculate_motor_speed_defence(displacement, angle, backwards_ok=True)
+        action = calculate_motor_speed(displacement, angle, backwards_ok=True)
 
         return action
 
