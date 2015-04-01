@@ -5,7 +5,7 @@ import time
 from Polygon.cPolygon import Polygon
 
 DEFAULT_KICK_POWER = 70
-BOUNCE_KICK_POWER = 85
+BOUNCE_KICK_POWER = 95
 
 class Strategy(object):
 
@@ -103,6 +103,11 @@ class SimplePass(Strategy):
 
     def avoid(self):
 
+        if not self.our_defender.has_ball(self.ball):
+            self.current_state = self.GET_BALL
+            self.our_defender.catcher = 'open'
+            return open_catcher()
+
         # Check if we're out of time
         # If we are, this means the opponent has been following us well
         # So we bounce pass
@@ -110,12 +115,11 @@ class SimplePass(Strategy):
             self.current_state = self.ALIGN_MID_FAR
             return do_nothing()
 
-        # Split the pitch into segments based on where we should go
-        # If opponent is very close to middle, we can go either way
-        # 2/5 top and bottom each, 1/5 middle
-        bottom_split = (2*self.world.pitch.height)/5
-        top_split = (3*self.world.pitch.height)/5
-        midpont = self.world.pitch.height/2
+
+        mid_bottom = (2*self.world.pitch.height)/5
+        mid_top = (3*self.world.pitch.height)/5
+
+        midpoint = self.world.pitch.height/2
 
         # Find out if the opponent is blocking our pass
         path = self.world.our_defender.get_pass_path(self.our_attacker)
@@ -126,19 +130,23 @@ class SimplePass(Strategy):
 
         if blocked:
             # Find space to pass from
-            # Choose a direction to go in
-            if self.their_attacker.y < bottom_split:
+            if (self.their_attacker.y > mid_bottom and
+                self.their_attacker.y < mid_top):
+                # They're in the middle
+                # So we go towards our partner
+                if (self.our_attacker.y < midpoint):
+                    pointY = 0
+                else:
+                    pointY = self.world.pitch.height
+
+            elif self.their_attacker.y < midpoint:
                 # Bottom blocked
                 pointY = self.world.pitch.height
             elif self.their_attacker.y > top_split:
                 # Top blocked
                 pointY = 0
-            else:
-                # Go whichever way is closest
-                if self.our_defender.y > midpont:
-                    pointY = self.world.pitch.height
-                else:
-                    pointY = 0
+
+
             if self.world._our_side == 'right':
                 pointX = 448
             else:
@@ -188,10 +196,7 @@ class SimplePass(Strategy):
         sum = 0
         for point in their_zone:
             sum += point[0]
-
         x_aim = sum/len(their_zone)
-
-        print "x aim", x_aim
 
         if (self.their_attacker.y < self.world.pitch.height/2):
             y_aim = self.world.pitch.height
