@@ -5,6 +5,7 @@ import time
 from Polygon.cPolygon import Polygon
 
 DEFAULT_KICK_POWER = 70
+BOUNCE_KICK_POWER = 85
 
 class Strategy(object):
 
@@ -38,11 +39,11 @@ class Strategy(object):
 class SimplePass(Strategy):
     # For controlling _defender_
 
-    (PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, 
+    (PREPARE, GET_BALL, AVOID, ALIGN_PARTNER, ALIGN_MID_FAR, 
         ALIGN_STRAIGHT, STOP, SHOOT, WAIT) = \
-        ('PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_MID_FAR', 
+        ('PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_PARTNER', 'ALIGN_MID_FAR', 
             'ALIGN_STRAIGHT', 'SHOOT', 'STOP', 'WAIT')
-    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, 
+    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_PARTNER, ALIGN_MID_FAR, 
         ALIGN_STRAIGHT, SHOOT, STOP, WAIT]
 
     def __init__(self, world):
@@ -52,7 +53,7 @@ class SimplePass(Strategy):
             self.PREPARE: self.prepare,
             self.GET_BALL: self.get_ball,
             self.AVOID: self.avoid,
-            self.ALIGN_HORIZ: self.align_horiz,
+            self.ALIGN_PARTNER: self.align_partner,
             self.ALIGN_MID_FAR: self.align_mid_far,
             self.ALIGN_STRAIGHT: self.align_straight,
             self.STOP: self.stop,
@@ -70,6 +71,7 @@ class SimplePass(Strategy):
 
         self.catchTime = -1
         self.clockwise = True
+        self.bounce_kick = False
 
     def prepare(self):
         self.current_state = self.GET_BALL
@@ -99,29 +101,27 @@ class SimplePass(Strategy):
 
     def avoid(self):
 
-        # Check we aren't out of time
+        # Check if we're out of time
+        # If we are, this means the opponent has been following us well
+        # So we bounce pass
         if time.clock() - self.catchTime > self.TIME_LIMIT:
             self.current_state = self.ALIGN_MID_FAR
             return do_nothing()
 
-        bottom_split = self.world.pitch.height/3
+        # Split the pitch into segments based on where we should go
+        # If opponent is very close to middle, we can go either way
+        # 2/5 top and bottom each, 1/5 middle
+        bottom_split = (2*self.world.pitch.height)/5
         top_split = bottom_split*2
         midpont = self.world.pitch.height/2
 
+        # Find out if the opponent is blocking our pass
+        path = self.world.our_defender.get_pass_path(self.world.our_attacker)
+        blocked = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
 
-        if abs(self.their_attacker.y - self.our_defender.y) > self.SPACE_THRESHOLD:
-            
-            path = self.world.our_defender.get_pass_path(self.world.our_attacker)
-            BLOCKED = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
-
-            print BLOCKED;
-
-            if(BLOCKED):
-                self.current_state = self.ALIGN_STRAIGHT
-            else:
-                self.current_state = self.ALIGN_HORIZ
-            return do_nothing()
-        else:
+        if blocked:
+            # Find space to pass from
+            # Choose a direction to go in
             if self.their_attacker.y < bottom_split:
                 # Bottom blocked
                 pointY = self.world.pitch.height
@@ -134,7 +134,6 @@ class SimplePass(Strategy):
                     pointY = self.world.pitch.height
                 else:
                     pointY = 0
-
             if self.world._our_side == 'right':
                 pointX = 448
             else:
@@ -142,31 +141,54 @@ class SimplePass(Strategy):
 
             displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
             return calculate_motor_speed(displacement, angle)
-
-    def align_horiz(self):
-        # aim horizontally
-       
-        angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
-
-        action = calculate_motor_speed(None, angle, careful=True)
-        
-        if action['left_motor'] > 0:
-            self.clockwise = True
-        elif action['left_motor'] < 0:
-            self.clockwise = False
         else:
-            self.current_state = self.STOP
-            self.stopTime = time.clock()
+            # We can pass directly
+            self.current_state = self.ALIGN_PARTNER
+            return do_nothing()
 
-        return action
+
+    def align_partner(self):
+        
+        # Find out if the opponent is now blocking our pass
+        path = self.world.our_defender.get_pass_path(self.world.our_attacker)
+        blocked = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
+        
+        if blocked:
+            # Go back to finding space
+            self.current_state = self.AVOID
+            return do_nothing
+        else:
+            angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
+
+            action = calculate_motor_speed(None, angle, careful=True)
+            
+            if action['left_motor'] > 0:
+                self.clockwise = True
+            elif action['left_motor'] < 0:
+                self.clockwise = False
+            else:
+                self.current_state = self.STOP
+                self.stopTime = time.clock()
+
+            return action
         
     def align_mid_far(self):
-        # aligns to middle of far away wall to do a bounce pass
-        x_aim = self.world.pitch.width/2
-        y_aim = 0
+        # Aligns to wall furthest from opponent to do a bounce pass
+        
+        # Find average of zone corners to get mid x value
+        their_zone = self.world.pitch.zones[self.their_attacker.zone][0]
+        sum = 0
+        for point in their_zone:
+            sum += point[0]
 
-        if (self.our_defender.y < self.world.pitch.height/2):
+        x_aim = sum/len(their_zone)
+
+        print "x aim", x_aim
+
+        if (self.their_attacker.y < self.world.pitch.height/2):
             y_aim = self.world.pitch.height
+        else:
+            y_aim = 0
 
         angle = self.our_defender.get_rotation_to_point(x_aim, y_aim)
         
@@ -177,6 +199,7 @@ class SimplePass(Strategy):
         elif action['left_motor'] < 0:
             self.clockwise = False
         else:
+            self.bounce_kick = True
             self.current_state = self.STOP
             self.stopTime = time.clock()
         
@@ -184,7 +207,6 @@ class SimplePass(Strategy):
 
     def align_straight(self):
         # aligns perpendicular because path is blocked
-
         angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
 
         action = calculate_motor_speed(None, angle, careful=True)
@@ -222,13 +244,19 @@ class SimplePass(Strategy):
             self.current_state = self.WAIT
             self.shootTime = currentTime
             self.our_defender.catcher = 'open'
-            return kick_ball(DEFAULT_KICK_POWER)
+            # Check for bounce kick - use higher power for this
+            if (self.bounce_kick):
+                self.bounce_kick = False
+                return kick_ball(BOUNCE_KICK_POWER)
+            else:
+                return kick_ball(DEFAULT_KICK_POWER)
         else:
             return do_nothing()
 
     def wait(self):
+        # Wait a bit to stop us from immediately trying to grab the ball
         currentTime = time.clock()
-        if (currentTime - self.shootTime) > 0.2:
+        if (currentTime - self.shootTime) > 0.4:
             self.current_state = self.GET_BALL
         return do_nothing()
 
