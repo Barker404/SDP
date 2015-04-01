@@ -164,7 +164,7 @@ class PitchObject(object):
         front_right = (self.x + length/2, self.y - width/2)
         back_left = (self.x - length/2, self.y + width/2)
         back_right = (self.x - length/2, self.y - width/2)
-        poly = Polygon((front_left, front_right, back_left, back_right))
+        poly = Polygon((front_left, front_right, back_right, back_left))
         poly.rotate(self.angle, self.x, self.y)
         return poly[0]
 
