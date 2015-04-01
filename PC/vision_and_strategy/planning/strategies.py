@@ -83,9 +83,11 @@ class SimplePass(Strategy):
 
     def get_ball(self):
 
-        # path = self.world.our_defender.get_pass_path(self.world.our_attacker)
-        # BLOCKED = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
-        # print BLOCKED;
+        # path = self.world.our_defender.get_pass_path(self.our_attacker)
+        # polygon = Polygon(self.their_attacker.get_generic_polygon(
+        #     self.their_attacker.width*2, self.their_attacker.length*2))
+        # blocked = path.overlaps(polygon)
+        # print blocked
 
         displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
         if self.our_defender.can_catch_ball(self.ball):
@@ -116,8 +118,11 @@ class SimplePass(Strategy):
         midpont = self.world.pitch.height/2
 
         # Find out if the opponent is blocking our pass
-        path = self.world.our_defender.get_pass_path(self.world.our_attacker)
-        blocked = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
+        path = self.world.our_defender.get_pass_path(self.our_attacker)
+        # Use a polygon with sides twice as big as the plates
+        polygon = Polygon(self.their_attacker.get_generic_polygon(
+            self.their_attacker.width*2, self.their_attacker.length*2))
+        blocked = path.overlaps(polygon)
 
         if blocked:
             # Find space to pass from
@@ -150,8 +155,11 @@ class SimplePass(Strategy):
     def align_partner(self):
         
         # Find out if the opponent is now blocking our pass
-        path = self.world.our_defender.get_pass_path(self.world.our_attacker)
-        blocked = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
+        path = self.world.our_defender.get_pass_path(self.our_attacker)
+        # Use a polygon with sides twice as big as the plates
+        polygon = Polygon(self.their_attacker.get_generic_polygon(
+            self.their_attacker.width*2, self.their_attacker.length*2))
+        blocked = path.overlaps(polygon)
         
         if blocked:
             # Go back to finding space
