@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 
 CONTROLS = ["LH", "UH", "LS", "US", "LV", "UV", "CT", "BL"]
-MAXBAR = {"LH":360,
-          "UH":360,
+MAXBAR = {"LH":180,
+          "UH":180,
           "LS":255,
           "US":255,
           "LV":255,
