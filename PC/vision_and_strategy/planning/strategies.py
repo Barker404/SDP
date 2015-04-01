@@ -114,7 +114,7 @@ class SimplePass(Strategy):
         # If opponent is very close to middle, we can go either way
         # 2/5 top and bottom each, 1/5 middle
         bottom_split = (2*self.world.pitch.height)/5
-        top_split = bottom_split*2
+        top_split = (3*self.world.pitch.height)/5
         midpont = self.world.pitch.height/2
 
         # Find out if the opponent is blocking our pass
@@ -164,7 +164,7 @@ class SimplePass(Strategy):
         if blocked:
             # Go back to finding space
             self.current_state = self.AVOID
-            return do_nothing
+            return do_nothing()
         else:
             angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
 
