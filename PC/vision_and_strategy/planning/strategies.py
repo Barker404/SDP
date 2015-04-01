@@ -38,9 +38,12 @@ class Strategy(object):
 class SimplePass(Strategy):
     # For controlling _defender_
 
-    PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, ALIGN_STRAIGHT, SHOOT, WAIT = \
-        'PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_MID_FAR', 'ALIGN_STRAIGHT', 'SHOOT', 'WAIT'
-    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, ALIGN_STRAIGHT, SHOOT, WAIT]
+    (PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, 
+        ALIGN_STRAIGHT, STOP, SHOOT, WAIT) = \
+        ('PREPARE', 'GET_BALL', 'AVOID', 'ALIGN_HORIZ', 'ALIGN_MID_FAR', 
+            'ALIGN_STRAIGHT', 'SHOOT', 'STOP', 'WAIT')
+    STATES = [PREPARE, GET_BALL, AVOID, ALIGN_HORIZ, ALIGN_MID_FAR, 
+        ALIGN_STRAIGHT, SHOOT, STOP, WAIT]
 
     def __init__(self, world):
         super(SimplePass, self).__init__(world, self.STATES)
@@ -52,20 +55,21 @@ class SimplePass(Strategy):
             self.ALIGN_HORIZ: self.align_horiz,
             self.ALIGN_MID_FAR: self.align_mid_far,
             self.ALIGN_STRAIGHT: self.align_straight,
+            self.STOP: self.stop,
             self.SHOOT: self.shoot,
             self.WAIT: self.wait
         }
 
-        self.catchTime = -1
-
         self.TIME_LIMIT = 8
-
         self.SPACE_THRESHOLD = 60
 
         self.our_attacker = self.world.our_attacker
         self.our_defender = self.world.our_defender
         self.their_attacker = self.world.their_attacker
         self.ball = self.world.ball
+
+        self.catchTime = -1
+        self.clockwise = True
 
     def prepare(self):
         self.current_state = self.GET_BALL
@@ -77,10 +81,9 @@ class SimplePass(Strategy):
 
     def get_ball(self):
 
-        path = self.world.our_defender.get_pass_path(self.world.our_attacker)
-        BLOCKED = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
-        print BLOCKED;
-
+        # path = self.world.our_defender.get_pass_path(self.world.our_attacker)
+        # BLOCKED = path.overlaps(Polygon(self.world.their_attacker.get_polygon()))
+        # print BLOCKED;
 
         displacement, angle = self.our_defender.get_direction_to_point(self.ball.x, self.ball.y)
         if self.our_defender.can_catch_ball(self.ball):
@@ -95,6 +98,7 @@ class SimplePass(Strategy):
                 return calculate_motor_speed_for_catch(displacement, angle, careful=True)
 
     def avoid(self):
+
         # Check we aren't out of time
         if time.clock() - self.catchTime > self.TIME_LIMIT:
             self.current_state = self.ALIGN_MID_FAR
@@ -145,14 +149,17 @@ class SimplePass(Strategy):
         angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_attacker.y)
 
         action = calculate_motor_speed(None, angle, careful=True)
-
-        if action['left_motor'] == 0 and action['right_motor'] == 0:
-            self.shootReadyTime = time.clock()
-            self.current_state = self.SHOOT
-            return action
+        
+        if action['left_motor'] > 0:
+            self.clockwise = True
+        elif action['left_motor'] < 0:
+            self.clockwise = False
         else:
-            return action
+            self.current_state = self.STOP
+            self.stopTime = time.clock()
 
+        return action
+        
     def align_mid_far(self):
         # aligns to middle of far away wall to do a bounce pass
         x_aim = self.world.pitch.width/2
@@ -164,13 +171,16 @@ class SimplePass(Strategy):
         angle = self.our_defender.get_rotation_to_point(x_aim, y_aim)
         
         action = calculate_motor_speed(None, angle, careful=True)
-
-        if action['left_motor'] == 0 and action['right_motor'] == 0:
-            self.shootReadyTime = time.clock()
-            self.current_state = self.SHOOT
-            return action
+        
+        if action['left_motor'] > 0:
+            self.clockwise = True
+        elif action['left_motor'] < 0:
+            self.clockwise = False
         else:
-            return action
+            self.current_state = self.STOP
+            self.stopTime = time.clock()
+        
+        return action
 
     def align_straight(self):
         # aligns perpendicular because path is blocked
@@ -178,12 +188,32 @@ class SimplePass(Strategy):
         angle = self.our_defender.get_rotation_to_point(self.world.our_attacker.x, self.world.our_defender.y)
 
         action = calculate_motor_speed(None, angle, careful=True)
+        
+        if action['left_motor'] > 0:
+            self.clockwise = True
+        elif action['left_motor'] < 0:
+            self.clockwise = False
+        else:
+            self.current_state = self.STOP
+            self.stopTime = time.clock()
+        
+        return action
 
-        if action['left_motor'] == 0 and action['right_motor'] == 0:
+    def stop(self):
+        # Fires the motors for a short burst in the opposite direction from the turn
+        # Counteracts the delay in stopping after the command is sent
+        timeNow = time.clock()
+        if (timeNow - self.stopTime > 0.3):
             self.shootReadyTime = time.clock()
             self.current_state = self.SHOOT
             return do_nothing()
         else:
+            speed = TURNING_SPEED_CAREFUL
+
+            if self.clockwise:
+                action = {'left_motor':-speed, 'right_motor':speed}
+            else:
+                action = {'left_motor':speed, 'right_motor':-speed}
             return action
 
     def shoot(self):
