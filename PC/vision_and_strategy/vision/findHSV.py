@@ -98,6 +98,33 @@ class CalibrationGUI(object):
 
         min_color = self.calibration[self.color]['min']
         max_color = self.calibration[self.color]['max']
-        frame_mask = cv2.inRange(frame_hsv, min_color, max_color)
+        # Create a mask bit by bit
+        # If max value is less than min value, swap so that the range is inverted
+
+        # hue
+        min_h = min_color[0]
+        max_h = max_color[0]
+        if (min_h <= max_h):
+            mask_h = cv2.inRange(frame_hsv, np.array([min_h, 0, 0]), np.array([max_h, 255, 255]))
+        else:
+            mask_h = ~cv2.inRange(frame_hsv, np.array([max_h, 0, 0]), np.array([min_h, 255, 255]))
+        
+        # saturation
+        min_s = min_color[1]
+        max_s = max_color[1]
+        if (min_s <= max_s):
+            mask_s = cv2.inRange(frame_hsv, np.array([0, min_s, 0]), np.array([179, max_s, 255]))
+        else:
+            mask_s = ~cv2.inRange(frame_hsv, np.array([0, max_s, 0]), np.array([179, min_s, 255]))
+        
+        # value
+        min_v = min_color[2]
+        max_v = max_color[2]
+        if (min_v <= max_v):
+            mask_v = cv2.inRange(frame_hsv, np.array([0, 0, min_v]), np.array([179, 255, max_v]))
+        else:
+            mask_v = cv2.inRange(frame_hsv, np.array([0, 0, max_v]), np.array([179, 255, min_v]))
+        
+        frame_mask = mask_h & mask_s & mask_v
 
         return frame_mask

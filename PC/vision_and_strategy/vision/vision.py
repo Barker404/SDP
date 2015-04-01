@@ -275,9 +275,9 @@ class Camera(object):
 
 class GUI(object):
 
-    VISION = 'SUCH VISION'
+    VISION = 'Vision'
     BG_SUB = 'BG Subtract'
-    NORMALIZE = 'Normalize  '
+    NORMALIZE = 'Normalize '
     COMMS = 'Communications on/off '
 
     def nothing(self, x):
@@ -482,7 +482,7 @@ class GUI(object):
 
         def_grabber = [(int(x) if x > -1 else 0, int(y) if y > -1 else 0) for x, y in def_grabber]
         att_grabber = [(int(x) if x > -1 else 0, int(y) if y > -1 else 0) for x, y in att_grabber]
-        
+
         cv2.polylines(frame, [np.array(def_grabber)], True, BGR_COMMON['red'], 1)
         cv2.polylines(frame, [np.array(att_grabber)], True, BGR_COMMON['red'], 1)
 

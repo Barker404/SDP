@@ -3,6 +3,7 @@ import numpy as np
 import math
 from collections import namedtuple
 import warnings
+import sys
 
 # Turning on KMEANS fitting:
 KMEANS = False
@@ -35,20 +36,42 @@ class Tracker(object):
             # Convert frame to HSV
             frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-            # Create a mask
-            frame_mask = cv2.inRange(frame_hsv, adjustments['min'], adjustments['max'])
-            frame_mask = cv2.morphologyEx(frame_mask, cv2.MORPH_OPEN, np.ones((2,2), np.uint8))
-            # Apply threshold to the masked image, no idea what the values mean
-            return_val, threshold = cv2.threshold(frame_mask, 127, 255, 0)
+            # Create a mask bit by bit
+            # If max value is less than min value, swap so that the range is inverted
+
+            # hue
+            min_h = adjustments['min'][0]
+            max_h = adjustments['max'][0]
+            if (min_h <= max_h):
+                mask_h = cv2.inRange(frame_hsv, np.array([min_h, 0, 0]), np.array([max_h, 255, 255]))
+            else:
+                mask_h = ~cv2.inRange(frame_hsv, np.array([max_h, 0, 0]), np.array([min_h, 255, 255]))
+            
+            # saturation
+            min_s = adjustments['min'][1]
+            max_s = adjustments['max'][1]
+            if (min_s <= max_s):
+                mask_s = cv2.inRange(frame_hsv, np.array([0, min_s, 0]), np.array([179, max_s, 255]))
+            else:
+                mask_s = ~cv2.inRange(frame_hsv, np.array([0, max_s, 0]), np.array([179, min_s, 255]))
+            
+            # value
+            min_v = adjustments['min'][2]
+            max_v = adjustments['max'][2]
+            if (min_v <= max_v):
+                mask_v = cv2.inRange(frame_hsv, np.array([0, 0, min_v]), np.array([179, 255, max_v]))
+            else:
+                mask_v = cv2.inRange(frame_hsv, np.array([0, 0, max_v]), np.array([179, 255, min_v]))
+
+            frame_mask = mask_h & mask_s & mask_v
 
             # Find contours
             contours, hierarchy = cv2.findContours(
-                threshold,
+                frame_mask,
                 cv2.RETR_TREE,
                 cv2.CHAIN_APPROX_SIMPLE
             )
 
-            #print contours
             return contours
         except:
             return None
@@ -69,19 +92,39 @@ class Tracker(object):
 
         # Convert frame to HSV
         frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        
+        # Create a mask bit by bit
+        # If max value is less than min value, swap so that the range is inverted
 
-        # Create a mask
-        frame_mask = cv2.inRange(frame_hsv, min_color, max_color)
-        frame_mask = cv2.morphologyEx(frame_mask, cv2.MORPH_OPEN, np.ones((2,2), np.uint8))
-        kernel = np.ones((5, 5), np.uint8)
-        erosion = cv2.erode(frame_mask, kernel, iterations=1)
-
-        # Apply threshold to the masked image, no idea what the values mean
-        return_val, threshold = cv2.threshold(frame_mask, 127, 255, 0)
-
+        # hue
+        min_h = min_color[0]
+        max_h = max_color[0]
+        if (min_h <= max_h):
+            mask_h = cv2.inRange(frame_hsv, np.array([min_h, 0, 0]), np.array([max_h, 255, 255]))
+        else:
+            mask_h = ~cv2.inRange(frame_hsv, np.array([max_h, 0, 0]), np.array([min_h, 255, 255]))
+        
+        # saturation
+        min_s = min_color[1]
+        max_s = max_color[1]
+        if (min_s <= max_s):
+            mask_s = cv2.inRange(frame_hsv, np.array([0, min_s, 0]), np.array([179, max_s, 255]))
+        else:
+            mask_s = ~cv2.inRange(frame_hsv, np.array([0, max_s, 0]), np.array([179, min_s, 255]))
+        
+        # value
+        min_v = min_color[2]
+        max_v = max_color[2]
+        if (min_v <= max_v):
+            mask_v = cv2.inRange(frame_hsv, np.array([0, 0, min_v]), np.array([179, 255, max_v]))
+        else:
+            mask_v = cv2.inRange(frame_hsv, np.array([0, 0, max_v]), np.array([179, 255, min_v]))
+        
+        frame_mask = mask_h & mask_s & mask_v
+        
         # Find contours, they describe the masked image - our T
         contours, hierarchy = cv2.findContours(
-            threshold,
+            frame_mask,
             cv2.RETR_TREE,
             cv2.CHAIN_APPROX_SIMPLE
         )
