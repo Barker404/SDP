@@ -166,7 +166,7 @@ class SimplePass(Strategy):
         path = self.world.our_defender.get_pass_path(self.our_attacker)
         # Use a polygon with sides twice as big as the plates
         polygon = Polygon(self.their_attacker.get_generic_polygon(
-            self.their_attacker.width*2, self.their_attacker.length*2))
+            self.their_attacker.width*1.2, self.their_attacker.length*1.2))
         blocked = path.overlaps(polygon)
         
         if blocked:
@@ -289,11 +289,11 @@ class SimpleBlock(Strategy):
         }
 
         if self.world._our_side == 'left':
-            self.min_x = 60
-            self.max_x = 90
+            self.min_x = 70
+            self.max_x = 95
         else:
-            self.min_x = 450
-            self.max_x = 480
+            self.min_x = 445
+            self.max_x = 470
 
         self.our_attacker = self.world.our_attacker
         self.their_attacker = self.world.their_attacker
@@ -311,14 +311,20 @@ class SimpleBlock(Strategy):
     def follow(self):
 
         x_aim = min(self.max_x, max(self.min_x, self.our_defender.x))
+        x_aim = min(self.max_x, max(self.min_x, self.our_defender.x))
 
         predicted_y = None
         # Predict where they are aiming.
         if self.ball.velocity > BALL_VELOCITY:
             predicted_y = predict_y_intersection(self.world, x_aim, self.ball, bounce=False)
 
+        # AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        # if predicted_y is None:
+        #     predicted_y = self.ball.y
+        #     predicted_y = min(max(predicted_y, 90), self.world._pitch.height - 90)
+
         if predicted_y is None:
-            predicted_y = self.ball.y
+            predicted_y = predict_y_intersection(self.world, x_aim, self.their_attacker, bounce=False)
             predicted_y = min(max(predicted_y, 90), self.world._pitch.height - 90)
 
         displacement, angle = self.our_defender.get_direction_to_point(x_aim, predicted_y)
