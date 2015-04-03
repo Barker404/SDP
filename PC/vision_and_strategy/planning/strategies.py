@@ -103,7 +103,8 @@ class SimplePass(Strategy):
 
     def avoid(self):
 
-        if not self.our_defender.has_ball(self.ball):
+        if (( not self.our_defender.can_grabbed_catch_ball(self.ball) ) 
+            and (not (time.clock() - self.catchTime < 0.5 ))):
             self.current_state = self.GET_BALL
             self.our_defender.catcher = 'open'
             return open_catcher()
@@ -148,12 +149,12 @@ class SimplePass(Strategy):
 
 
             if self.world._our_side == 'right':
-                pointX = 448
+                pointX = 458
             else:
-                pointX = 70
+                pointX = 50
 
             displacement, angle = self.our_defender.get_direction_to_point(pointX, pointY)
-            return calculate_motor_speed(displacement, angle)
+            return calculate_motor_speed(displacement, angle, careful=True)
         else:
             # We can pass directly
             self.current_state = self.ALIGN_PARTNER
@@ -166,7 +167,7 @@ class SimplePass(Strategy):
         path = self.world.our_defender.get_pass_path(self.our_attacker)
         # Use a polygon with sides twice as big as the plates
         polygon = Polygon(self.their_attacker.get_generic_polygon(
-            self.their_attacker.width*1.2, self.their_attacker.length*1.2))
+            self.their_attacker.width*1.5, self.their_attacker.length*1.5))
         blocked = path.overlaps(polygon)
         
         if blocked:

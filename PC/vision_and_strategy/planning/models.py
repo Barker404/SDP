@@ -229,7 +229,18 @@ class Robot(PitchObject):
         front_right = (self.x + self._catcher_area['front_offset'] + height, self.y - width/2.0)
         back_left = (self.x + self._catcher_area['front_offset'], self.y + width/2.0)
         back_right = (self.x + self._catcher_area['front_offset'], self.y - width/2.0)
-        area = Polygon((front_left, front_right, back_left, back_right))
+        area = Polygon((front_left, front_right, back_right, back_left))
+        area.rotate(self.angle, self.x, self.y)
+
+    @property
+    def catcher_area_grabbed(self):
+        height = self._catcher_area['height'] + CATCHING_DISP_THRESHOLD+10
+        width = self._catcher_area['width']+5
+        front_left = (self.x + self._catcher_area['front_offset'] + height, self.y + width/2.0)
+        front_right = (self.x + self._catcher_area['front_offset'] + height, self.y - width/2.0)
+        back_left = (self.x + self._catcher_area['front_offset'], self.y + width/2.0)
+        back_right = (self.x + self._catcher_area['front_offset'], self.y - width/2.0)
+        area = Polygon((front_left, front_right, back_right, back_left))
         area.rotate(self.angle, self.x, self.y)
 
         return area
@@ -255,6 +266,12 @@ class Robot(PitchObject):
         '''
         return self.catcher_area_extra.isInside(ball.x, ball.y)
 
+    def can_grabbed_catch_ball(self, ball):
+        '''
+        check if we can use grabber to defend
+        '''
+        return self.catcher_area_grabbed.isInside(ball.x, ball.y)
+
 
 
     def can_start_turning(self, x, y):
@@ -269,6 +286,12 @@ class Robot(PitchObject):
         Gets if the robot has possession of the ball
         '''
         return (self._catcher == 'closed') and self.can_catch_ball(ball)
+
+    def has_ball_while_grabbed(self, ball):
+        '''
+        Gets if the robot has possession of the ball
+        '''
+        return (self._catcher == 'closed') and self.can_grabbed_catch_ball(ball)
 
     def can_defend_with_grabber(self, ball):
 
